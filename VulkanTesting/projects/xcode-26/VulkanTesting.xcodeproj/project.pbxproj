@@ -12,6 +12,7 @@
 		8E7000B92EA01094004E0250 /* libglfw.3.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E7000B82EA01094004E0250 /* libglfw.3.4.dylib */; };
 		8E7000BA2EA0109B004E0250 /* libglfw.3.4.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E7000B82EA01094004E0250 /* libglfw.3.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		8E7000BC2EA010B2004E0250 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E7000BB2EA010B2004E0250 /* main.cpp */; };
+		8E7000C32EA011A5004E0250 /* HelloTriangleApplication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E7000C22EA011A5004E0250 /* HelloTriangleApplication.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -33,6 +34,8 @@
 		8E7000B82EA01094004E0250 /* libglfw.3.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.4.dylib; path = ../../../../../../../opt/homebrew/Cellar/glfw/3.4/lib/libglfw.3.4.dylib; sourceTree = "<group>"; };
 		8E7000BB2EA010B2004E0250 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/main.cpp"; sourceTree = "<absolute>"; };
 		8E7000BD2EA01119004E0250 /* libvulkan.1.4.328.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.4.328.dylib; path = ../../../libraries/vulkan/macOS/lib/libvulkan.1.4.328.dylib; sourceTree = "<group>"; };
+		8E7000C12EA011A5004E0250 /* HelloTriangleApplication.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = HelloTriangleApplication.hpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/HelloTriangleApplication.hpp"; sourceTree = "<absolute>"; };
+		8E7000C22EA011A5004E0250 /* HelloTriangleApplication.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = HelloTriangleApplication.cpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/HelloTriangleApplication.cpp"; sourceTree = "<absolute>"; };
 		8ECB62902E9FF80A00B88911 /* VulkanTesting */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VulkanTesting; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -53,6 +56,8 @@
 			isa = PBXGroup;
 			children = (
 				8E7000BB2EA010B2004E0250 /* main.cpp */,
+				8E7000C12EA011A5004E0250 /* HelloTriangleApplication.hpp */,
+				8E7000C22EA011A5004E0250 /* HelloTriangleApplication.cpp */,
 			);
 			path = Code;
 			sourceTree = "<group>";
@@ -145,6 +150,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8E7000BC2EA010B2004E0250 /* main.cpp in Sources */,
+				8E7000C32EA011A5004E0250 /* HelloTriangleApplication.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

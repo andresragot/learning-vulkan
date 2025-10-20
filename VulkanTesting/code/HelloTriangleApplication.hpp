@@ -10,6 +10,8 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include <vector>
+
 namespace  Ragot
 {
     class HelloTriangleApplication
@@ -17,9 +19,21 @@ namespace  Ragot
     private:
         static constexpr unsigned WIDTH = 800;
         static constexpr unsigned HEIGHT = 600;
+        
+        const std::vector < const char * > validation_layers = {
+            "MoltenVK"
+        };
+
+#ifdef NDEBUG
+        const bool enable_validation_layers = false;
+#else
+        const bool enable_validation_layers = true;
+#endif
+
     
         GLFWwindow * window;
         VkInstance vk_instance;
+        VkPhysicalDevice physical_device = VK_NULL_HANDLE;
     
     public:
         void run ()
@@ -36,6 +50,7 @@ namespace  Ragot
         void initVulkan()
         {
             createInstance();
+            pickPhysicalDevice();
         }
         
         void mainLoop();
@@ -43,8 +58,14 @@ namespace  Ragot
         void cleanup();
         
         void createInstance();
+        
+        void pickPhysicalDevice();
 
         void availableExtensions();
+        
+        bool checkValidationLayerSupport();
+        
+        bool isDeviceSuitable(VkPhysicalDevice device);
     };
 }
 

@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+#include <cstring>
 
 namespace Ragot
 {
@@ -41,6 +42,11 @@ namespace Ragot
     
     void HelloTriangleApplication::createInstance()
     {
+        if (enable_validation_layers && not checkValidationLayerSupport())
+        {
+            throw std::runtime_error("validation layers requested, but not available!");
+        }
+    
         VkApplicationInfo app_info {};
         app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         app_info.pApplicationName = "Hello Triangle";
@@ -63,7 +69,15 @@ namespace Ragot
         create_info.enabledExtensionCount = glfwExtensionCount;
         create_info.ppEnabledExtensionNames = glfwExtensions;
         
-        create_info.enabledLayerCount = 0;
+        if (enable_validation_layers)
+        {
+            create_info.enabledLayerCount = static_cast<uint32_t>(validation_layers.size());
+            create_info.ppEnabledLayerNames = validation_layers.data();
+        }
+        else
+        {
+            create_info.enabledLayerCount = 0;
+        }
         
         
         VkResult result;
@@ -74,6 +88,34 @@ namespace Ragot
         }
         
         std::cout << "Vulkan instance created successfully!" << std::endl;
+    }
+    
+    void HelloTriangleApplication::pickPhysicalDevice()
+    {
+        uint32_t device_count = 0;
+        vkEnumeratePhysicalDevices(vk_instance, &device_count, nullptr);
+        
+        if (device_count == 0)
+        {
+            throw std::runtime_error("failed to find GPUs with Vulkan support!");
+        }
+        
+        std::vector < VkPhysicalDevice > devices (device_count);
+        vkEnumeratePhysicalDevices(vk_instance, &device_count, devices.data());
+        
+        for (const auto & device : devices)
+        {
+            if (isDeviceSuitable(device))
+            {
+                physical_device = device;
+                break;
+            }
+        }
+        
+        if (physical_device == VK_NULL_HANDLE)
+        {
+            std::runtime_error("failed to find a suitable GPU!");
+        }
     }
     
     void HelloTriangleApplication::availableExtensions()
@@ -91,5 +133,49 @@ namespace Ragot
         {
             std::cout << '\t' << extension.extensionName << std::endl;
         }
+    }
+    
+    bool HelloTriangleApplication::checkValidationLayerSupport()
+    {
+        uint32_t layer_count;
+        vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
+        
+        std::vector < VkLayerProperties > available_layers (layer_count);
+        
+        vkEnumerateInstanceLayerProperties(&layer_count, available_layers.data());
+        
+        for (const char * layer_name : validation_layers)
+        {
+            bool layer_found = false;
+            
+            for (const auto & layer_properties : available_layers)
+            {
+                std::cout << layer_properties.layerName << std::endl;
+                if (strcmp(layer_name, layer_properties.layerName) == 0)
+                {
+                    layer_found = true;
+                    break;
+                }
+            }
+            
+            if (not layer_found) return false;
+        }
+        
+        return true;
+    }
+    
+    bool HelloTriangleApplication::isDeviceSuitable(VkPhysicalDevice device)
+    {
+        VkPhysicalDeviceProperties device_properties;
+        vkGetPhysicalDeviceProperties(device, &device_properties);
+        
+        VkPhysicalDeviceFeatures device_features;
+        vkGetPhysicalDeviceFeatures(device, &device_features);
+        
+        
+        std::cout << "Device name: " << device_properties.deviceName << std::endl;
+
+        return device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+                device_features.geometryShader;
     }
 }

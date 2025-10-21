@@ -65,9 +65,9 @@
 			isa = PBXGroup;
 			children = (
 				8E7000BB2EA010B2004E0250 /* main.cpp */,
-				8E7000C12EA011A5004E0250 /* HelloTriangleApplication.hpp */,
 				8E45FF8B2EA7587C00CA6D72 /* QueueFamilyIndices.hpp */,
 				8E45FF8C2EA7587C00CA6D72 /* QueueFamilyIndices.cpp */,
+				8E7000C12EA011A5004E0250 /* HelloTriangleApplication.hpp */,
 				8E7000C22EA011A5004E0250 /* HelloTriangleApplication.cpp */,
 			);
 			path = Code;

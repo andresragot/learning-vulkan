@@ -33,6 +33,8 @@ namespace Ragot
     
     void HelloTriangleApplication::cleanup()
     {
+        vkDestroyDevice(device, nullptr);
+        
         vkDestroyInstance(vk_instance, nullptr);
 
         glfwDestroyWindow(window);
@@ -107,6 +109,7 @@ namespace Ragot
         {
             if (isDeviceSuitable(device))
             {
+                std::cout << "Device is suitable" << std::endl;
                 physical_device = device;
                 break;
             }
@@ -114,7 +117,7 @@ namespace Ragot
         
         if (physical_device == VK_NULL_HANDLE)
         {
-            std::runtime_error("failed to find a suitable GPU!");
+            throw std::runtime_error("failed to find a suitable GPU!");
         }
     }
     
@@ -175,20 +178,12 @@ namespace Ragot
         
         std::cout << "Device name: " << device_properties.deviceName << std::endl;
 
-        if (device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
-                device_features.geometryShader)
-        {
-            QueueFamilyIndices indices = findQueueFamilies(device);
-            
-            VkDeviceQueueCreateInfo queue_create_info {};
-            queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-            queue_create_info.queueFamilyIndex = indices.graphicsFamily.value();
-            queue_create_info.queueCount = 1;
-            
-            return indices.isComplete();
-        }
+        // return device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && device_features.geometryShader;
+
+        std::cout << "Getting Queue Family Indices" << std::endl;
+        QueueFamilyIndices indices = findQueueFamilies(device);
         
-        return false;
+        return indices.isComplete();
     }
     
     QueueFamilyIndices HelloTriangleApplication::findQueueFamilies (VkPhysicalDevice device)
@@ -218,5 +213,46 @@ namespace Ragot
         }
         
         return indices;
+    }
+    
+    void HelloTriangleApplication::createLogicalDevice()
+    {
+        QueueFamilyIndices indices = findQueueFamilies(physical_device);
+    
+        VkDeviceQueueCreateInfo queue_create_info {};
+        queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queue_create_info.queueFamilyIndex = indices.graphicsFamily.value();
+        queue_create_info.queueCount = 1;
+        
+        float queuePriority = 1.0f;
+        queue_create_info.pQueuePriorities = &queuePriority;
+        
+        VkDeviceCreateInfo create_info {};
+        create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        
+        create_info.pQueueCreateInfos = &queue_create_info;
+        create_info.queueCreateInfoCount = 1;
+        
+        VkPhysicalDeviceFeatures device_features {};
+        create_info.pEnabledFeatures = &device_features;
+        
+        create_info.enabledExtensionCount = 0;
+        
+        if (enable_validation_layers)
+        {
+            create_info.enabledLayerCount = static_cast < uint32_t > (validation_layers.size());
+            create_info.ppEnabledLayerNames = validation_layers.data();
+        }
+        else
+        {
+            create_info.enabledLayerCount = 0;
+        }
+        
+        if (vkCreateDevice(physical_device, &create_info, nullptr, &device) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create logical device!");
+        }
+        
+        vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
     }
 }

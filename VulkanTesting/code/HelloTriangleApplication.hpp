@@ -38,6 +38,7 @@ namespace  Ragot
         VkInstance vk_instance;
         VkPhysicalDevice physical_device = VK_NULL_HANDLE;
         VkDevice device;
+        VkQueue graphicsQueue;
     
     public:
         void run ()

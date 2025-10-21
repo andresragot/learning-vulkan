@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8E45FF8D2EA7587C00CA6D72 /* QueueFamilyIndices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E45FF8C2EA7587C00CA6D72 /* QueueFamilyIndices.cpp */; };
 		8E7000B62EA0101E004E0250 /* libvulkan.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E7000B52EA0101E004E0250 /* libvulkan.1.dylib */; };
 		8E7000B72EA01023004E0250 /* libvulkan.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E7000B52EA0101E004E0250 /* libvulkan.1.dylib */; };
 		8E7000B92EA01094004E0250 /* libglfw.3.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E7000B82EA01094004E0250 /* libglfw.3.4.dylib */; };
@@ -34,6 +35,8 @@
 
 /* Begin PBXFileReference section */
 		8E008CB72EA670C700F51089 /* opt */ = {isa = PBXFileReference; lastKnownFileType = folder; name = opt; path = ../../../../../../../opt; sourceTree = "<group>"; };
+		8E45FF8B2EA7587C00CA6D72 /* QueueFamilyIndices.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = QueueFamilyIndices.hpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/QueueFamilyIndices.hpp"; sourceTree = "<absolute>"; };
+		8E45FF8C2EA7587C00CA6D72 /* QueueFamilyIndices.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = QueueFamilyIndices.cpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/QueueFamilyIndices.cpp"; sourceTree = "<absolute>"; };
 		8E7000B52EA0101E004E0250 /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../../libraries/vulkan/macOS/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
 		8E7000B82EA01094004E0250 /* libglfw.3.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.4.dylib; path = ../../../../../../../opt/homebrew/Cellar/glfw/3.4/lib/libglfw.3.4.dylib; sourceTree = "<group>"; };
 		8E7000BB2EA010B2004E0250 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/main.cpp"; sourceTree = "<absolute>"; };
@@ -63,6 +66,8 @@
 			children = (
 				8E7000BB2EA010B2004E0250 /* main.cpp */,
 				8E7000C12EA011A5004E0250 /* HelloTriangleApplication.hpp */,
+				8E45FF8B2EA7587C00CA6D72 /* QueueFamilyIndices.hpp */,
+				8E45FF8C2EA7587C00CA6D72 /* QueueFamilyIndices.cpp */,
 				8E7000C22EA011A5004E0250 /* HelloTriangleApplication.cpp */,
 			);
 			path = Code;
@@ -157,6 +162,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E45FF8D2EA7587C00CA6D72 /* QueueFamilyIndices.cpp in Sources */,
 				8E7000BC2EA010B2004E0250 /* main.cpp in Sources */,
 				8E7000C32EA011A5004E0250 /* HelloTriangleApplication.cpp in Sources */,
 			);

@@ -11,6 +11,9 @@
 #include <GLFW/glfw3.h>
 
 #include <vector>
+#include <optional>
+
+#include "QueueFamilyIndices.hpp"
 
 namespace  Ragot
 {
@@ -34,6 +37,7 @@ namespace  Ragot
         GLFWwindow * window;
         VkInstance vk_instance;
         VkPhysicalDevice physical_device = VK_NULL_HANDLE;
+        VkDevice device;
     
     public:
         void run ()
@@ -51,6 +55,7 @@ namespace  Ragot
         {
             createInstance();
             pickPhysicalDevice();
+            createLogicalDevice();
         }
         
         void mainLoop();
@@ -60,12 +65,16 @@ namespace  Ragot
         void createInstance();
         
         void pickPhysicalDevice();
+        
+        void createLogicalDevice();
 
         void availableExtensions();
         
         bool checkValidationLayerSupport();
         
         bool isDeviceSuitable(VkPhysicalDevice device);
+        
+        QueueFamilyIndices findQueueFamilies (VkPhysicalDevice device);
     };
 }
 

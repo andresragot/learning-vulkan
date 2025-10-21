@@ -175,7 +175,48 @@ namespace Ragot
         
         std::cout << "Device name: " << device_properties.deviceName << std::endl;
 
-        return device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
-                device_features.geometryShader;
+        if (device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+                device_features.geometryShader)
+        {
+            QueueFamilyIndices indices = findQueueFamilies(device);
+            
+            VkDeviceQueueCreateInfo queue_create_info {};
+            queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            queue_create_info.queueFamilyIndex = indices.graphicsFamily.value();
+            queue_create_info.queueCount = 1;
+            
+            return indices.isComplete();
+        }
+        
+        return false;
+    }
+    
+    QueueFamilyIndices HelloTriangleApplication::findQueueFamilies (VkPhysicalDevice device)
+    {
+        QueueFamilyIndices indices;
+        
+        uint32_t queueFamilyCount = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+        
+        std::vector < VkQueueFamilyProperties > queueFamilies (queueFamilyCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+        
+        int i = 0;
+        for (const auto & queueFamily : queueFamilies)
+        {
+            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            {
+                indices.graphicsFamily = i;
+            }
+            
+            if (indices.isComplete())
+            {
+                break;
+            }
+            
+            ++i;
+        }
+        
+        return indices;
     }
 }

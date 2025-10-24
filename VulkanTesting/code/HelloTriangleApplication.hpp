@@ -7,8 +7,17 @@
 
 #pragma once
 
+
+// En HelloTriangleApplication.hpp, ANTES de incluir GLFW:
+#define VK_USE_PLATFORM_MACOS_MVK
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+
+#define GLFW_EXPOSE_NATIVE_COCOA
+#include <GLFW/glfw3native.h>
+
+// También necesitas incluir vulkan.h para los defines de extensiones:
+#include <vulkan/vulkan.h>
 
 #include <vector>
 #include <optional>
@@ -36,6 +45,7 @@ namespace  Ragot
     
         GLFWwindow * window;
         VkInstance vk_instance;
+        VkSurfaceKHR surface;
         VkPhysicalDevice physical_device = VK_NULL_HANDLE;
         VkDevice device;
         VkQueue graphicsQueue;
@@ -55,6 +65,7 @@ namespace  Ragot
         void initVulkan()
         {
             createInstance();
+            createSurface();
             pickPhysicalDevice();
             createLogicalDevice();
         }
@@ -64,6 +75,8 @@ namespace  Ragot
         void cleanup();
         
         void createInstance();
+        
+        void createSurface();
         
         void pickPhysicalDevice();
         

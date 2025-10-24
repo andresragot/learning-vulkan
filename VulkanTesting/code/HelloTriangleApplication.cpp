@@ -11,6 +11,8 @@
 #include <iostream>
 #include <cstring>
 
+#include "ObjC-interface.h"
+
 namespace Ragot
 {
     void HelloTriangleApplication::initWindow()
@@ -34,6 +36,8 @@ namespace Ragot
     void HelloTriangleApplication::cleanup()
     {
         vkDestroyDevice(device, nullptr);
+        
+        vkDestroySurfaceKHR(vk_instance, surface, nullptr);
         
         vkDestroyInstance(vk_instance, nullptr);
 
@@ -63,13 +67,70 @@ namespace Ragot
         
         uint32_t glfwExtensionCount = 0;
         const char ** glfwExtensions;
-        
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
         
-        create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+        std::cout << "\nGLFW required extensions count: " << glfwExtensionCount << std::endl;
         
-        create_info.enabledExtensionCount = glfwExtensionCount;
-        create_info.ppEnabledExtensionNames = glfwExtensions;
+        std::vector<const char*> extensions;
+        
+        if (glfwExtensions && glfwExtensionCount > 0)
+        {
+            extensions.assign(glfwExtensions, glfwExtensions + glfwExtensionCount);
+            std::cout << "GLFW extensions:" << std::endl;
+            for (uint32_t i = 0; i < glfwExtensionCount; ++i)
+            {
+                std::cout << "  - " << glfwExtensions[i] << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "WARNING: GLFW returned no extensions, adding manually for macOS" << std::endl;
+            extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);           // "VK_KHR_surface"
+            #ifdef VK_USE_PLATFORM_MACOS_MVK
+                // extensions.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME); // "VK_EXT_metal_surface"
+                // O alternativamente:
+                extensions.push_back("VK_MVK_macos_surface");
+                extensions.push_back("VK_MVK_moltenvk");
+            #endif
+        }
+        
+        // Verificar extensiones disponibles
+        uint32_t availableExtCount = 0;
+        vkEnumerateInstanceExtensionProperties(nullptr, &availableExtCount, nullptr);
+        std::vector<VkExtensionProperties> availableExts(availableExtCount);
+        vkEnumerateInstanceExtensionProperties(nullptr, &availableExtCount, availableExts.data());
+        
+        bool hasPortabilityEnum = false;
+        for (const auto& ext : availableExts)
+        {
+            if (strcmp(ext.extensionName, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME) == 0)
+            {
+                hasPortabilityEnum = true;
+                break;
+            }
+        }
+        
+        // Solo agregar portability enumeration si está disponible
+        if (hasPortabilityEnum)
+        {
+            extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+            std::cout << "\nAdding VK_KHR_portability_enumeration" << std::endl;
+        }
+        
+        std::cout << "\nEnabled extensions:" << std::endl;
+        for (const auto& ext : extensions)
+        {
+            std::cout << "  - " << ext << std::endl;
+        }
+        
+        create_info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+        create_info.ppEnabledExtensionNames = extensions.data();
+        
+        // Solo habilitar el flag si tenemos la extensión
+        if (hasPortabilityEnum)
+        {
+            create_info.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+        }
         
         if (enable_validation_layers)
         {
@@ -81,7 +142,6 @@ namespace Ragot
             create_info.enabledLayerCount = 0;
         }
         
-        
         VkResult result;
         if ((result = vkCreateInstance(&create_info, nullptr, &vk_instance)) != VK_SUCCESS)
         {
@@ -90,6 +150,27 @@ namespace Ragot
         }
         
         std::cout << "Vulkan instance created successfully!" << std::endl;
+    }
+
+
+    void HelloTriangleApplication::createSurface()
+    {
+        id windowHandle = glfwGetCocoaWindow(window);
+        id viewHandle = (id) getViewFromNSWindowPointer(windowHandle);
+        
+        VkMacOSSurfaceCreateInfoMVK create_info = {};
+        create_info.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
+        create_info.pNext = nullptr;
+        create_info.flags = 0;
+        create_info.pView = viewHandle;
+        
+        PFN_vkCreateMacOSSurfaceMVK vkCreateMacOSSurfaceMVK;
+        vkCreateMacOSSurfaceMVK = (PFN_vkCreateMacOSSurfaceMVK) vkGetInstanceProcAddr(vk_instance, "vkCreateMacOSSurfaceMVK");
+        
+        if (vkCreateMacOSSurfaceMVK(vk_instance, &create_info, nullptr, &surface) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create surface!");
+        }
     }
     
     void HelloTriangleApplication::pickPhysicalDevice()

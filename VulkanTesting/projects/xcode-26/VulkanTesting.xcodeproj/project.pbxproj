@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8E174FC92EAB806E00D3B240 /* libMoltenVK.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EE5B6AB2EA68FEA0048BD6C /* libMoltenVK.dylib */; };
+		8E174FCA2EAB807500D3B240 /* libMoltenVK.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8EE5B6AB2EA68FEA0048BD6C /* libMoltenVK.dylib */; };
+		8E174FCC2EAB8F2D00D3B240 /* ObjC-interface.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E174FCB2EAB8F2D00D3B240 /* ObjC-interface.m */; };
 		8E45FF8D2EA7587C00CA6D72 /* QueueFamilyIndices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E45FF8C2EA7587C00CA6D72 /* QueueFamilyIndices.cpp */; };
 		8E7000B62EA0101E004E0250 /* libvulkan.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E7000B52EA0101E004E0250 /* libvulkan.1.dylib */; };
 		8E7000B72EA01023004E0250 /* libvulkan.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E7000B52EA0101E004E0250 /* libvulkan.1.dylib */; };
@@ -14,8 +17,6 @@
 		8E7000BA2EA0109B004E0250 /* libglfw.3.4.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8E7000B82EA01094004E0250 /* libglfw.3.4.dylib */; };
 		8E7000BC2EA010B2004E0250 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E7000BB2EA010B2004E0250 /* main.cpp */; };
 		8E7000C32EA011A5004E0250 /* HelloTriangleApplication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8E7000C22EA011A5004E0250 /* HelloTriangleApplication.cpp */; };
-		8EE5B6AE2EA6A5C90048BD6C /* libMoltenVK.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EE5B6AB2EA68FEA0048BD6C /* libMoltenVK.dylib */; };
-		8EE5B6AF2EA6A5CE0048BD6C /* libMoltenVK.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8EE5B6AB2EA68FEA0048BD6C /* libMoltenVK.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,7 +26,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				8EE5B6AF2EA6A5CE0048BD6C /* libMoltenVK.dylib in CopyFiles */,
+				8E174FCA2EAB807500D3B240 /* libMoltenVK.dylib in CopyFiles */,
 				8E7000BA2EA0109B004E0250 /* libglfw.3.4.dylib in CopyFiles */,
 				8E7000B72EA01023004E0250 /* libvulkan.1.dylib in CopyFiles */,
 			);
@@ -35,6 +36,8 @@
 
 /* Begin PBXFileReference section */
 		8E008CB72EA670C700F51089 /* opt */ = {isa = PBXFileReference; lastKnownFileType = folder; name = opt; path = ../../../../../../../opt; sourceTree = "<group>"; };
+		8E174FCB2EAB8F2D00D3B240 /* ObjC-interface.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "ObjC-interface.m"; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/obj-c/ObjC-interface.m"; sourceTree = "<absolute>"; };
+		8E174FCD2EAB903200D3B240 /* ObjC-interface.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "ObjC-interface.h"; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/ObjC-interface.h"; sourceTree = "<absolute>"; };
 		8E45FF8B2EA7587C00CA6D72 /* QueueFamilyIndices.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = QueueFamilyIndices.hpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/QueueFamilyIndices.hpp"; sourceTree = "<absolute>"; };
 		8E45FF8C2EA7587C00CA6D72 /* QueueFamilyIndices.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = QueueFamilyIndices.cpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/QueueFamilyIndices.cpp"; sourceTree = "<absolute>"; };
 		8E7000B52EA0101E004E0250 /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../../libraries/vulkan/macOS/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
@@ -52,7 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8EE5B6AE2EA6A5C90048BD6C /* libMoltenVK.dylib in Frameworks */,
+				8E174FC92EAB806E00D3B240 /* libMoltenVK.dylib in Frameworks */,
 				8E7000B92EA01094004E0250 /* libglfw.3.4.dylib in Frameworks */,
 				8E7000B62EA0101E004E0250 /* libvulkan.1.dylib in Frameworks */,
 			);
@@ -69,6 +72,7 @@
 				8E45FF8C2EA7587C00CA6D72 /* QueueFamilyIndices.cpp */,
 				8E7000C12EA011A5004E0250 /* HelloTriangleApplication.hpp */,
 				8E7000C22EA011A5004E0250 /* HelloTriangleApplication.cpp */,
+				8E174FCD2EAB903200D3B240 /* ObjC-interface.h */,
 			);
 			path = Code;
 			sourceTree = "<group>";
@@ -76,6 +80,7 @@
 		8ECB62872E9FF80A00B88911 = {
 			isa = PBXGroup;
 			children = (
+				8E174FCB2EAB8F2D00D3B240 /* ObjC-interface.m */,
 				8ECB629A2E9FFB3600B88911 /* Frameworks */,
 				8ECB62912E9FF80A00B88911 /* Products */,
 				8E7000C02EA01134004E0250 /* Code */,
@@ -165,6 +170,7 @@
 				8E45FF8D2EA7587C00CA6D72 /* QueueFamilyIndices.cpp in Sources */,
 				8E7000BC2EA010B2004E0250 /* main.cpp in Sources */,
 				8E7000C32EA011A5004E0250 /* HelloTriangleApplication.cpp in Sources */,
+				8E174FCC2EAB8F2D00D3B240 /* ObjC-interface.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -10,6 +10,7 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include <set>
 
 #include "ObjC-interface.h"
 
@@ -308,20 +309,29 @@ namespace Ragot
     void HelloTriangleApplication::createLogicalDevice()
     {
         QueueFamilyIndices indices = findQueueFamilies(physical_device);
-    
-        VkDeviceQueueCreateInfo queue_create_info {};
-        queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queue_create_info.queueFamilyIndex = indices.graphicsFamily.value();
-        queue_create_info.queueCount = 1;
+        
+        std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
+        std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
         
         float queuePriority = 1.0f;
-        queue_create_info.pQueuePriorities = &queuePriority;
+        for (uint32_t queueFamily : uniqueQueueFamilies)
+        {
+            VkDeviceQueueCreateInfo queue_create_info {};
+            queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            queue_create_info.queueFamilyIndex = indices.graphicsFamily.value();
+            queue_create_info.queueCount = 1;
+            
+            queue_create_info.pQueuePriorities = &queuePriority;
+            queue_create_infos.push_back(queue_create_info);
+        
+        }
+    
         
         VkDeviceCreateInfo create_info {};
         create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         
-        create_info.pQueueCreateInfos = &queue_create_info;
-        create_info.queueCreateInfoCount = 1;
+        create_info.pQueueCreateInfos = queue_create_infos.data();
+        create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
         
         VkPhysicalDeviceFeatures device_features {};
         create_info.pEnabledFeatures = &device_features;
@@ -344,5 +354,6 @@ namespace Ragot
         }
         
         vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+        vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
     }
 }

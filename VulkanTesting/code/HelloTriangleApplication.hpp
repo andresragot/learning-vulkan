@@ -13,15 +13,10 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#define GLFW_EXPOSE_NATIVE_COCOA
-#include <GLFW/glfw3native.h>
-
-// También necesitas incluir vulkan.h para los defines de extensiones:
-#include <vulkan/vulkan.h>
-
 #include <vector>
 #include <optional>
 
+#include "SwapChainSupportDetails.hpp"
 #include "QueueFamilyIndices.hpp"
 
 namespace  Ragot
@@ -33,7 +28,11 @@ namespace  Ragot
         static constexpr unsigned HEIGHT = 600;
         
         const std::vector < const char * > validation_layers = {
-            "MoltenVK"
+            "MoltenVK",
+        };
+        
+        const std::vector < const char * > deviceExtensions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
         };
 
 #ifdef NDEBUG
@@ -50,6 +49,11 @@ namespace  Ragot
         VkDevice device;
         VkQueue graphicsQueue;
         VkQueue presentQueue;
+        
+        VkSwapchainKHR swapChain;
+        std::vector < VkImage > swapChainImages;
+        VkFormat swapChainImageFormat;
+        VkExtent2D swapChainExtent;
     
     public:
         void run ()
@@ -69,6 +73,7 @@ namespace  Ragot
             createSurface();
             pickPhysicalDevice();
             createLogicalDevice();
+            createSwapChain();
         }
         
         void mainLoop();
@@ -82,6 +87,8 @@ namespace  Ragot
         void pickPhysicalDevice();
         
         void createLogicalDevice();
+        
+        void createSwapChain();
 
         void availableExtensions();
         
@@ -89,7 +96,17 @@ namespace  Ragot
         
         bool isDeviceSuitable(VkPhysicalDevice device);
         
+        bool checkDeviceExtensionSupport (VkPhysicalDevice device);
+        
         QueueFamilyIndices findQueueFamilies (VkPhysicalDevice device);
+        
+        SwapChainSupportDetails querySwapChainSupport (VkPhysicalDevice device);
+        
+        VkSurfaceFormatKHR chooseSwapSurfaceFormat (const std::vector < VkSurfaceFormatKHR > & availableFormats);
+        
+        VkPresentModeKHR chooseSwapSurfaceFormat (const std::vector < VkPresentModeKHR > & availablePresentModes);
+        
+        VkExtent2D chooseSwapExtent (const VkSurfaceCapabilitiesKHR & capabilities);
     };
 }
 

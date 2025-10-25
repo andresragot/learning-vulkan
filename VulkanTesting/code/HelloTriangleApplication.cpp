@@ -12,6 +12,9 @@
 #include <cstring>
 #include <set>
 
+#define GLFW_EXPOSE_NATIVE_COCOA
+#include <GLFW/glfw3native.h>
+
 #include "ObjC-interface.h"
 
 namespace Ragot
@@ -36,6 +39,8 @@ namespace Ragot
     
     void HelloTriangleApplication::cleanup()
     {
+        vkDestroySwapchainKHR(device, swapChain, nullptr);
+    
         vkDestroyDevice(device, nullptr);
         
         vkDestroySurfaceKHR(vk_instance, surface, nullptr);
@@ -174,6 +179,70 @@ namespace Ragot
         }
     }
     
+    void HelloTriangleApplication::createSwapChain()
+    {
+        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physical_device);
+        
+        VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
+        VkPresentModeKHR presentMode = chooseSwapSurfaceFormat(swapChainSupport.presentModes);
+        VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+        
+        uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+        
+        if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
+        {
+            imageCount = swapChainSupport.capabilities.maxImageCount;
+        }
+        
+        VkSwapchainCreateInfoKHR create_info {};
+        create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+        create_info.surface = surface;
+        
+        create_info.minImageCount = imageCount;
+        create_info.imageFormat = surfaceFormat.format;
+        create_info.imageColorSpace = surfaceFormat.colorSpace;
+        create_info.imageExtent = extent;
+        create_info.imageArrayLayers = 1;
+        create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        
+        QueueFamilyIndices indices = findQueueFamilies(physical_device);
+        uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+        
+        if (indices.graphicsFamily != indices.presentFamily)
+        {
+            create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+            create_info.queueFamilyIndexCount = 2;
+            create_info.pQueueFamilyIndices = queueFamilyIndices;
+        }
+        else
+        {
+            create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            create_info.queueFamilyIndexCount = 0; // Optional
+            create_info.pQueueFamilyIndices = nullptr; // Optional
+        }
+        
+        create_info.preTransform = swapChainSupport.capabilities.currentTransform;
+        
+        create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+        
+        create_info.presentMode = presentMode;
+        create_info.clipped = VK_TRUE;
+        
+        create_info.oldSwapchain = VK_NULL_HANDLE;
+        
+        if (vkCreateSwapchainKHR(device, &create_info, nullptr, &swapChain) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create swap chain!");
+        }
+        
+        vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
+        swapChainImages.resize(imageCount);
+        vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data());
+        
+        swapChainImageFormat = surfaceFormat.format;
+        swapChainExtent = extent;
+    }
+    
     void HelloTriangleApplication::pickPhysicalDevice()
     {
         uint32_t device_count = 0;
@@ -258,14 +327,40 @@ namespace Ragot
         vkGetPhysicalDeviceFeatures(device, &device_features);
         
         
-        std::cout << "Device name: " << device_properties.deviceName << std::endl;
+        std::cout << "\nDevice name: " << device_properties.deviceName << std::endl;
 
         // return device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && device_features.geometryShader;
 
-        std::cout << "Getting Queue Family Indices" << std::endl;
         QueueFamilyIndices indices = findQueueFamilies(device);
         
-        return indices.isComplete();
+        bool extensionsSupported = checkDeviceExtensionSupport(device);
+        
+        bool swapChainAdequate = false;
+        if (extensionsSupported)
+        {
+            SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+            swapChainAdequate = not swapChainSupport.formats.empty() && not swapChainSupport.presentModes.empty();
+        }
+        
+        return indices.isComplete() && extensionsSupported && swapChainAdequate;
+    }
+    
+    bool HelloTriangleApplication::checkDeviceExtensionSupport (VkPhysicalDevice device)
+    {
+        uint32_t extensionCount;
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+        
+        std::vector < VkExtensionProperties > availableExtensions (extensionCount);
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+        
+        std::set < std::string > requiredExtensions (deviceExtensions.begin(), deviceExtensions.end());
+        
+        for (const auto & extension : availableExtensions)
+        {
+            requiredExtensions.erase (extension.extensionName);
+        }
+        
+        return requiredExtensions.empty();
     }
     
     QueueFamilyIndices HelloTriangleApplication::findQueueFamilies (VkPhysicalDevice device)
@@ -306,6 +401,83 @@ namespace Ragot
         return indices;
     }
     
+    SwapChainSupportDetails HelloTriangleApplication::querySwapChainSupport (VkPhysicalDevice device)
+    {
+        SwapChainSupportDetails details;
+        
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
+        
+        uint32_t formatCount;
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+        
+        if (formatCount != 0)
+        {
+            details.formats.resize(formatCount);
+            vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
+        }
+        
+        uint32_t presentModeCount;
+        vkGetPhysicalDeviceSurfacePresentModesKHR (device, surface, &presentModeCount, nullptr);
+        
+        if (presentModeCount != 0)
+        {
+            details.presentModes.resize(presentModeCount);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
+        }
+        
+        
+        return details;
+    }
+    
+    VkSurfaceFormatKHR HelloTriangleApplication::chooseSwapSurfaceFormat (const std::vector < VkSurfaceFormatKHR > & availableFormats)
+    {
+        for (const auto & availableFormat : availableFormats)
+        {
+            if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            {
+                return availableFormat;
+            }
+        }
+    
+        return availableFormats[0];
+    }
+    
+    VkPresentModeKHR HelloTriangleApplication::chooseSwapSurfaceFormat (const std::vector < VkPresentModeKHR > & availablePresentModes)
+    {
+        for (const auto & availablePresentMode : availablePresentModes)
+        {
+            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+            {
+                std::cout << "VK_PRESENT_MODE_MAILBOX_KHR" << std::endl;
+                return availablePresentMode;
+            }
+        }
+    
+        return VK_PRESENT_MODE_FIFO_KHR;
+    }
+    
+    VkExtent2D HelloTriangleApplication::chooseSwapExtent (const VkSurfaceCapabilitiesKHR & capabilities)
+    {
+        if (capabilities.currentExtent.width != std::numeric_limits < uint32_t >::max())
+        {
+            return capabilities.currentExtent;
+        }
+            
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+        
+        VkExtent2D actualExtent = {
+            static_cast<uint32_t>(width),
+            static_cast<uint32_t>(height)
+        };
+        
+        actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+        actualExtent.height = std::clamp(actualExtent.height, capabilities.maxImageExtent.height, capabilities.maxImageExtent.height);
+        
+        return actualExtent;            
+    }
+    
+    
     void HelloTriangleApplication::createLogicalDevice()
     {
         QueueFamilyIndices indices = findQueueFamilies(physical_device);
@@ -318,7 +490,7 @@ namespace Ragot
         {
             VkDeviceQueueCreateInfo queue_create_info {};
             queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-            queue_create_info.queueFamilyIndex = indices.graphicsFamily.value();
+            queue_create_info.queueFamilyIndex = queueFamily;
             queue_create_info.queueCount = 1;
             
             queue_create_info.pQueuePriorities = &queuePriority;
@@ -336,7 +508,8 @@ namespace Ragot
         VkPhysicalDeviceFeatures device_features {};
         create_info.pEnabledFeatures = &device_features;
         
-        create_info.enabledExtensionCount = 0;
+        create_info.enabledExtensionCount = static_cast < uint32_t > (deviceExtensions.size());
+        create_info.ppEnabledExtensionNames = deviceExtensions.data();
         
         if (enable_validation_layers)
         {

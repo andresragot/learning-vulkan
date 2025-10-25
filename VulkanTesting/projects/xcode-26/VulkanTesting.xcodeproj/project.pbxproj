@@ -38,6 +38,7 @@
 		8E008CB72EA670C700F51089 /* opt */ = {isa = PBXFileReference; lastKnownFileType = folder; name = opt; path = ../../../../../../../opt; sourceTree = "<group>"; };
 		8E174FCB2EAB8F2D00D3B240 /* ObjC-interface.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "ObjC-interface.m"; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/obj-c/ObjC-interface.m"; sourceTree = "<absolute>"; };
 		8E174FCD2EAB903200D3B240 /* ObjC-interface.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "ObjC-interface.h"; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/ObjC-interface.h"; sourceTree = "<absolute>"; };
+		8E1B89AC2EAD3643005568DE /* SwapChainSupportDetails.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = SwapChainSupportDetails.hpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/SwapChainSupportDetails.hpp"; sourceTree = "<absolute>"; };
 		8E45FF8B2EA7587C00CA6D72 /* QueueFamilyIndices.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = QueueFamilyIndices.hpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/QueueFamilyIndices.hpp"; sourceTree = "<absolute>"; };
 		8E45FF8C2EA7587C00CA6D72 /* QueueFamilyIndices.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = QueueFamilyIndices.cpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/QueueFamilyIndices.cpp"; sourceTree = "<absolute>"; };
 		8E7000B52EA0101E004E0250 /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../../libraries/vulkan/macOS/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
@@ -72,6 +73,7 @@
 				8E45FF8C2EA7587C00CA6D72 /* QueueFamilyIndices.cpp */,
 				8E7000C12EA011A5004E0250 /* HelloTriangleApplication.hpp */,
 				8E7000C22EA011A5004E0250 /* HelloTriangleApplication.cpp */,
+				8E1B89AC2EAD3643005568DE /* SwapChainSupportDetails.hpp */,
 				8E174FCD2EAB903200D3B240 /* ObjC-interface.h */,
 			);
 			path = Code;

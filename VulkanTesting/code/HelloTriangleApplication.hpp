@@ -52,6 +52,7 @@ namespace  Ragot
         
         VkSwapchainKHR swapChain;
         std::vector < VkImage > swapChainImages;
+        std::vector < VkImageView > swapChainImageViews;
         VkFormat swapChainImageFormat;
         VkExtent2D swapChainExtent;
     
@@ -74,6 +75,7 @@ namespace  Ragot
             pickPhysicalDevice();
             createLogicalDevice();
             createSwapChain();
+            createImageViews();
         }
         
         void mainLoop();
@@ -89,6 +91,8 @@ namespace  Ragot
         void createLogicalDevice();
         
         void createSwapChain();
+        
+        void createImageViews();
 
         void availableExtensions();
         

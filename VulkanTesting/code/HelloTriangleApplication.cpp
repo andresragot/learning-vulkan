@@ -39,6 +39,11 @@ namespace Ragot
     
     void HelloTriangleApplication::cleanup()
     {
+        for (auto imageView : swapChainImageViews)
+        {
+            vkDestroyImageView(device, imageView, nullptr);
+        }
+    
         vkDestroySwapchainKHR(device, swapChain, nullptr);
     
         vkDestroyDevice(device, nullptr);
@@ -241,6 +246,38 @@ namespace Ragot
         
         swapChainImageFormat = surfaceFormat.format;
         swapChainExtent = extent;
+    }
+    
+    void HelloTriangleApplication::createImageViews()
+    {
+        swapChainImageViews.resize(swapChainImages.size());
+        
+        for (size_t i = 0; i < swapChainImages.size(); ++i)
+        {
+            VkImageViewCreateInfo create_info {};
+            
+            create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            create_info.image = swapChainImages[i];
+            
+            create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+            create_info.format = swapChainImageFormat;
+            
+            create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+            create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+            create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+            create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+            
+            create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            create_info.subresourceRange.baseMipLevel = 0;
+            create_info.subresourceRange.levelCount = 1;
+            create_info.subresourceRange.baseArrayLayer = 0;
+            create_info.subresourceRange.layerCount = 1;
+            
+            if (vkCreateImageView(device, &create_info, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
+            {
+                throw std::runtime_error("failed to create image views!");
+            }
+        }
     }
     
     void HelloTriangleApplication::pickPhysicalDevice()
@@ -448,7 +485,6 @@ namespace Ragot
         {
             if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
             {
-                std::cout << "VK_PRESENT_MODE_MAILBOX_KHR" << std::endl;
                 return availablePresentMode;
             }
         }

@@ -48,6 +48,8 @@
 		8E7000C12EA011A5004E0250 /* HelloTriangleApplication.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = HelloTriangleApplication.hpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/HelloTriangleApplication.hpp"; sourceTree = "<absolute>"; };
 		8E7000C22EA011A5004E0250 /* HelloTriangleApplication.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = HelloTriangleApplication.cpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/HelloTriangleApplication.cpp"; sourceTree = "<absolute>"; };
 		8ECB62902E9FF80A00B88911 /* VulkanTesting */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VulkanTesting; sourceTree = BUILT_PRODUCTS_DIR; };
+		8ECCECE22EB8D75400B9DEDC /* shader.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = shader.vert; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/shaders/shader.vert"; sourceTree = "<absolute>"; };
+		8ECCECE32EB8D81700B9DEDC /* shader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = shader.frag; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/shaders/shader.frag"; sourceTree = "<absolute>"; };
 		8EE5B6AB2EA68FEA0048BD6C /* libMoltenVK.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libMoltenVK.dylib; path = ../../../libraries/vulkan/macOS/lib/libMoltenVK.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -73,6 +75,8 @@
 				8E45FF8C2EA7587C00CA6D72 /* QueueFamilyIndices.cpp */,
 				8E7000C12EA011A5004E0250 /* HelloTriangleApplication.hpp */,
 				8E7000C22EA011A5004E0250 /* HelloTriangleApplication.cpp */,
+				8ECCECE22EB8D75400B9DEDC /* shader.vert */,
+				8ECCECE32EB8D81700B9DEDC /* shader.frag */,
 				8E1B89AC2EAD3643005568DE /* SwapChainSupportDetails.hpp */,
 				8E174FCD2EAB903200D3B240 /* ObjC-interface.h */,
 			);
@@ -119,6 +123,7 @@
 				8ECB628C2E9FF80A00B88911 /* Sources */,
 				8ECB628D2E9FF80A00B88911 /* Frameworks */,
 				8ECB628E2E9FF80A00B88911 /* CopyFiles */,
+				8ECCECE42EB8E31B00B9DEDC /* Run Script */,
 			);
 			buildRules = (
 			);
@@ -163,6 +168,31 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8ECCECE42EB8E31B00B9DEDC /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../../code/shaders/shader.vert",
+				"$(SRCROOT)/../../code/shaders/shader.frag",
+			);
+			name = "Run Script";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Shaders/vert.spv",
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Shaders/frag.spv",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/sh\nset -eu\n\n# --- PATH y localización de glslangValidator ---\nPATH=\"/opt/homebrew/bin:/usr/local/bin:${PATH}\"\nexport PATH\n\nfind_glslang() {\n  # 1) PATH\n  if command -v glslangValidator >/dev/null 2>&1; then\n    printf '%s\\n' \"$(command -v glslangValidator)\"\n    return 0\n  fi\n  # 2) VULKAN_SDK\n  if [ -n \"${VULKAN_SDK:-}\" ] && [ -x \"${VULKAN_SDK}/bin/glslangValidator\" ]; then\n    printf '%s\\n' \"${VULKAN_SDK}/bin/glslangValidator\"\n    return 0\n  fi\n  # 3) Tu layout del repo (SRCROOT = .../projects/xcode-26)\n  for rel in \"../../../libraries/vulkan/macOS/bin/glslangValidator\" \"../../libraries/vulkan/macOS/bin/glslangValidator\" \"../libraries/vulkan/macOS/bin/glslangValidator\"; do\n    if [ -x \"${SRCROOT}/${rel}\" ]; then\n      printf '%s\\n' \"${SRCROOT}/${rel}\"\n      return 0\n    fi\n  done\n  return 1\n}\n\nGLSLANG=\"$(find_glslang)\" || { echo \"ERROR: glslangValidator no encontrado\"; exit 1; }\necho \"Usando glslang: ${GLSLANG}\"\n\n# --- OUT_DIR por si NO hay outputs declarados ---\nif [ -n \"${CONTENTS_FOLDER_PATH:-}\" ]; then\n  OUT_DIR=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Shaders\"\nelif [ -n \"${WRAPPER_NAME:-}\" ]; then\n  OUT_DIR=\"${TARGET_BUILD_DIR}/${WRAPPER_NAME}/Contents/Shaders\"\nelse\n  OUT_DIR=\"${BUILT_PRODUCTS_DIR}/Shaders\"\nfi\nmkdir -p \"${OUT_DIR}\"\n\necho \"SCRIPT_INPUT_FILE_COUNT=${SCRIPT_INPUT_FILE_COUNT:-0}\"\necho \"SCRIPT_OUTPUT_FILE_COUNT=${SCRIPT_OUTPUT_FILE_COUNT:-0}\"\n\n# --- Mapear outputs declarados (sin arrays asociativos) ---\nDST_VERT=\"\"\nDST_FRAG=\"\"\ni=0\nCOUNT_OUT=\"${SCRIPT_OUTPUT_FILE_COUNT:-0}\"\nwhile [ \"$i\" -lt \"$COUNT_OUT\" ]; do\n  eval out=\\${SCRIPT_OUTPUT_FILE_${i}}\n  case \"$out\" in\n    */vert.spv) DST_VERT=\"$out\" ;;\n    */frag.spv) DST_FRAG=\"$out\" ;;\n  esac\n  i=$((i+1))\ndone\n\ncompiled=0\nCOUNT_IN=\"${SCRIPT_INPUT_FILE_COUNT:-0}\"\n\nif [ \"$COUNT_IN\" -gt 0 ]; then\n  # --- Usar exactamente los Input/Output Files que definiste en Xcode ---\n  i=0\n  while [ \"$i\" -lt \"$COUNT_IN\" ]; do\n    eval src=\\${SCRIPT_INPUT_FILE_${i}}\n    case \"$src\" in\n      *.vert) dst=\"${DST_VERT:-${OUT_DIR}/vert.spv}\" ;;\n      *.frag) dst=\"${DST_FRAG:-${OUT_DIR}/frag.spv}\" ;;\n      *) echo \"WARNING: extensión no soportada: $src\"; i=$((i+1)); continue ;;\n    esac\n    echo \"Compilando ${src} -> ${dst}\"\n    mkdir -p \"$(dirname \"$dst\")\"\n    \"${GLSLANG}\" -V \"$src\" -o \"$dst\"\n    compiled=$((compiled+1))\n    i=$((i+1))\n  done\nelse\n  # --- Fallback: sin Inputs declarados, escanear carpeta por convención ---\n  SHADERS_DIR=\"${SRCROOT}/shaders\"  # cambia a 'Shaders' si es con mayúscula\n  echo \"SHADERS_DIR=${SHADERS_DIR}\"\n  for src in \"${SHADERS_DIR}\"/*.vert \"${SHADERS_DIR}\"/*.frag; do\n    [ -e \"$src\" ] || continue\n    base=$(basename \"$src\")\n    name=${base%.*}\n    dst=\"${OUT_DIR}/${name}.spv\"\n    echo \"Compilando ${base} -> ${dst}\"\n    \"${GLSLANG}\" -V \"$src\" -o \"$dst\"\n    compiled=$((compiled+1))\n  done\nfi\n\nif [ \"$compiled\" -eq 0 ]; then\n  echo \"ERROR: No se compiló ningún shader (revisa Inputs/Outputs o rutas).\"\n  exit 2\nfi\n\necho \"OK: ${compiled} shader(s) compilado(s).\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8ECB628C2E9FF80A00B88911 /* Sources */ = {
@@ -217,6 +247,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				FUSE_BUILD_SCRIPT_PHASES = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -280,6 +311,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				FUSE_BUILD_SCRIPT_PHASES = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;

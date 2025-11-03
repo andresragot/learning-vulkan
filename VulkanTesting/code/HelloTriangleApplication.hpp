@@ -76,6 +76,7 @@ namespace  Ragot
             createLogicalDevice();
             createSwapChain();
             createImageViews();
+            createGraphicsPipeline();
         }
         
         void mainLoop();
@@ -93,6 +94,8 @@ namespace  Ragot
         void createSwapChain();
         
         void createImageViews();
+        
+        void createGraphicsPipeline();
 
         void availableExtensions();
         

@@ -280,6 +280,11 @@ namespace Ragot
         }
     }
     
+    void HelloTriangleApplication::createGraphicsPipeline()
+    {
+        
+    }
+    
     void HelloTriangleApplication::pickPhysicalDevice()
     {
         uint32_t device_count = 0;

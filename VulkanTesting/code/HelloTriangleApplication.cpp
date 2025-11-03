@@ -286,6 +286,26 @@ namespace Ragot
     {
         auto vertShaderCode = readFile(assets.get_asset_path("Shaders/vert.spv"));
         auto fragShaderCode = readFile(assets.get_asset_path("Shaders/frag.spv"));
+        
+        VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+        VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+        
+        VkPipelineShaderStageCreateInfo vertShaderStateInfo{};
+        vertShaderStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        vertShaderStateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+        vertShaderStateInfo.module = vertShaderModule;
+        vertShaderStateInfo.pName = "main";
+        
+        VkPipelineShaderStageCreateInfo fragShaderStateInfo{};
+        fragShaderStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        fragShaderStateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        fragShaderStateInfo.module = fragShaderModule;
+        fragShaderStateInfo.pName = "main";
+        
+        VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStateInfo, fragShaderStateInfo};
+        
+        vkDestroyShaderModule(device, vertShaderModule, nullptr);
+        vkDestroyShaderModule(device, fragShaderModule, nullptr);
     }
     
     void HelloTriangleApplication::pickPhysicalDevice()
@@ -594,4 +614,23 @@ namespace Ragot
         
         return buffer;
     }
+    
+    VkShaderModule HelloTriangleApplication::createShaderModule(const std::vector<char>& code)
+    {
+        VkShaderModuleCreateInfo create_info {};
+        create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        create_info.codeSize = code.size();
+        create_info.pCode = reinterpret_cast<const uint32_t*>(code.data());
+        
+        VkShaderModule shaderModule;
+        if (vkCreateShaderModule(device, &create_info, nullptr, &shaderModule) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create shader module!");
+        }
+        
+        return shaderModule;
+    }
+    
+    
+
 }

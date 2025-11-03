@@ -116,6 +116,8 @@ namespace  Ragot
         VkExtent2D chooseSwapExtent (const VkSurfaceCapabilitiesKHR & capabilities);
         
         static std::vector<char> readFile (const std::string & filename);
+        
+        VkShaderModule createShaderModule(const std::vector<char>& code);
     };
 }
 

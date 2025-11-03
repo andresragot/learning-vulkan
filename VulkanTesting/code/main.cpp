@@ -3,9 +3,14 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
+#include "Assets.hpp"
 
-int main ()
+int main (int argc, const char * argv[])
 {
+    std::cout << argv[0] << std::endl;
+    
+    Ragot::assets.initialize(argv[0]);
+
     Ragot::HelloTriangleApplication app;
     
     try

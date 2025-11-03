@@ -114,6 +114,8 @@ namespace  Ragot
         VkPresentModeKHR chooseSwapSurfaceFormat (const std::vector < VkPresentModeKHR > & availablePresentModes);
         
         VkExtent2D chooseSwapExtent (const VkSurfaceCapabilitiesKHR & capabilities);
+        
+        static std::vector<char> readFile (const std::string & filename);
     };
 }
 

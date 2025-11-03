@@ -11,11 +11,13 @@
 #include <iostream>
 #include <cstring>
 #include <set>
+#include <fstream>
 
 #define GLFW_EXPOSE_NATIVE_COCOA
 #include <GLFW/glfw3native.h>
 
 #include "ObjC-interface.h"
+#include "Assets.hpp"
 
 namespace Ragot
 {
@@ -282,7 +284,8 @@ namespace Ragot
     
     void HelloTriangleApplication::createGraphicsPipeline()
     {
-        
+        auto vertShaderCode = readFile(assets.get_asset_path("Shaders/vert.spv"));
+        auto fragShaderCode = readFile(assets.get_asset_path("Shaders/frag.spv"));
     }
     
     void HelloTriangleApplication::pickPhysicalDevice()
@@ -569,5 +572,26 @@ namespace Ragot
         
         vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
         vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+    }
+    
+    std::vector<char> HelloTriangleApplication::readFile (const std::string & filename)
+    {
+        std::ifstream file (filename, std::ios::ate | std::ios::binary);
+        
+        if (!file.is_open())
+        {
+            throw std::runtime_error("failed to open file!");
+        }
+        
+        size_t fileSize = static_cast<size_t>(file.tellg());
+        std::cout << "File: " << filename << ", of size: " << fileSize << " opened." << std::endl;
+        
+        std::vector<char> buffer(fileSize);
+        
+        file.seekg(0);
+        file.read(buffer.data(), fileSize);
+        file.close();
+        
+        return buffer;
     }
 }

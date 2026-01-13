@@ -57,6 +57,7 @@ namespace  Ragot
         VkExtent2D swapChainExtent;
         
         VkPipelineLayout pipelineLayout;
+        VkRenderPass renderPass;
     
     public:
         void run ()
@@ -78,6 +79,7 @@ namespace  Ragot
             createLogicalDevice();
             createSwapChain();
             createImageViews();
+            createRenderPass();
             createGraphicsPipeline();
         }
         
@@ -96,6 +98,8 @@ namespace  Ragot
         void createSwapChain();
         
         void createImageViews();
+        
+        void createRenderPass();
         
         void createGraphicsPipeline();
 

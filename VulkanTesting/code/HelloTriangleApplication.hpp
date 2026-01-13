@@ -55,6 +55,8 @@ namespace  Ragot
         std::vector < VkImageView > swapChainImageViews;
         VkFormat swapChainImageFormat;
         VkExtent2D swapChainExtent;
+        
+        VkPipelineLayout pipelineLayout;
     
     public:
         void run ()

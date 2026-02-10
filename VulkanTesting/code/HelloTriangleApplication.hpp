@@ -58,6 +58,7 @@ namespace  Ragot
         
         VkPipelineLayout pipelineLayout;
         VkRenderPass renderPass;
+        VkPipeline graphicsPipeline;
     
     public:
         void run ()

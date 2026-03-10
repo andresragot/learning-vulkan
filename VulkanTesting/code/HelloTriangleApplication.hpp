@@ -139,6 +139,8 @@ namespace  Ragot
         static std::vector<char> readFile (const std::string & filename);
         
         VkShaderModule createShaderModule(const std::vector<char>& code);
+        
+        void recordCommanBuffer (VkCommandBuffer commandBuffer, uint32_t imageIndex);
     };
 }
 

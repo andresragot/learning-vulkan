@@ -64,6 +64,10 @@ namespace  Ragot
         
         VkCommandPool commandPool;
         VkCommandBuffer commandBuffer;
+        
+        VkSemaphore imageAvailableSemaphore;
+        VkSemaphore renderFinishedSemaphore;
+        VkFence inFlightFence;
     
     public:
         void run ()
@@ -90,6 +94,7 @@ namespace  Ragot
             createFramebuffers();
             createCommandPool();
             createCommandBuffer();
+            createSyncObjects();
         }
         
         void mainLoop();
@@ -117,6 +122,8 @@ namespace  Ragot
         void createCommandPool();
         
         void createCommandBuffer();
+        
+        void createSyncObjects();
 
         void availableExtensions();
         
@@ -141,6 +148,8 @@ namespace  Ragot
         VkShaderModule createShaderModule(const std::vector<char>& code);
         
         void recordCommanBuffer (VkCommandBuffer commandBuffer, uint32_t imageIndex);
+        
+        void drawFrame();
     };
 }
 

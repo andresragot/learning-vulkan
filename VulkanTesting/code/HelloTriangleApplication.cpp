@@ -41,6 +41,11 @@ namespace Ragot
     
     void HelloTriangleApplication::cleanup()
     {
+        for (auto framebuffer : swapChainFrameBuffers)
+        {
+            vkDestroyFramebuffer(device, framebuffer, nullptr);
+        }
+    
         vkDestroyPipeline(device, graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
         vkDestroyRenderPass(device, renderPass, nullptr);
@@ -466,6 +471,32 @@ namespace Ragot
         
         vkDestroyShaderModule(device, vertShaderModule, nullptr);
         vkDestroyShaderModule(device, fragShaderModule, nullptr);
+    }
+    
+    void HelloTriangleApplication::createFramebuffers()
+    {
+        swapChainFrameBuffers.resize(swapChainImages.size());
+        
+        for (size_t i = 0; i < swapChainImages.size(); ++i)
+        {
+            VkImageView attachments[] = {
+                swapChainImageViews[i]
+            };
+            
+            VkFramebufferCreateInfo framebufferInfo {};
+            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferInfo.renderPass = renderPass;
+            framebufferInfo.attachmentCount = 1;
+            framebufferInfo.pAttachments = attachments;
+            framebufferInfo.width = swapChainExtent.width;
+            framebufferInfo.height = swapChainExtent.height;
+            framebufferInfo.layers = 1;
+            
+            if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFrameBuffers[i]) != VK_SUCCESS)
+            {
+                throw std::runtime_error("failed to create framebuffer!");
+            }
+        }
     }
     
     void HelloTriangleApplication::pickPhysicalDevice()

@@ -59,6 +59,8 @@ namespace  Ragot
         VkPipelineLayout pipelineLayout;
         VkRenderPass renderPass;
         VkPipeline graphicsPipeline;
+        
+        std::vector < VkFramebuffer > swapChainFrameBuffers;
     
     public:
         void run ()
@@ -82,6 +84,7 @@ namespace  Ragot
             createImageViews();
             createRenderPass();
             createGraphicsPipeline();
+            createFramebuffers();
         }
         
         void mainLoop();
@@ -103,6 +106,8 @@ namespace  Ragot
         void createRenderPass();
         
         void createGraphicsPipeline();
+        
+        void createFramebuffers();
 
         void availableExtensions();
         

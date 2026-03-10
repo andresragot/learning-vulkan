@@ -41,6 +41,8 @@ namespace Ragot
     
     void HelloTriangleApplication::cleanup()
     {
+        vkDestroyCommandPool(device, commandPool, nullptr);
+        
         for (auto framebuffer : swapChainFrameBuffers)
         {
             vkDestroyFramebuffer(device, framebuffer, nullptr);
@@ -496,6 +498,21 @@ namespace Ragot
             {
                 throw std::runtime_error("failed to create framebuffer!");
             }
+        }
+    }
+    
+    void HelloTriangleApplication::createCommandPool()
+    {
+        QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physical_device);
+        
+        VkCommandPoolCreateInfo poolInfo {};
+        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+        
+        if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create command pool!");
         }
     }
     

@@ -61,6 +61,8 @@ namespace  Ragot
         VkPipeline graphicsPipeline;
         
         std::vector < VkFramebuffer > swapChainFrameBuffers;
+        
+        VkCommandPool commandPool;
     
     public:
         void run ()
@@ -85,6 +87,7 @@ namespace  Ragot
             createRenderPass();
             createGraphicsPipeline();
             createFramebuffers();
+            createCommandPool();
         }
         
         void mainLoop();
@@ -108,6 +111,8 @@ namespace  Ragot
         void createGraphicsPipeline();
         
         void createFramebuffers();
+        
+        void createCommandPool();
 
         void availableExtensions();
         

@@ -27,6 +27,8 @@ namespace  Ragot
     class HelloTriangleApplication
     {
     private:
+        const int MAX_FRAMES_IN_FLIGHT = 2;
+
         static constexpr unsigned WIDTH = 800;
         static constexpr unsigned HEIGHT = 600;
         
@@ -43,7 +45,7 @@ namespace  Ragot
 #else
         const bool enable_validation_layers = false;
 #endif
-
+        uint32_t currentFrame = 0;
     
         GLFWwindow * window;
         VkInstance vk_instance;
@@ -66,11 +68,14 @@ namespace  Ragot
         std::vector < VkFramebuffer > swapChainFrameBuffers;
         
         VkCommandPool commandPool;
-        VkCommandBuffer commandBuffer;
+        std::vector < VkCommandBuffer > commandBuffers;
         
-        VkSemaphore imageAvailableSemaphore;
-        VkSemaphore renderFinishedSemaphore;
-        VkFence inFlightFence;
+        std::vector < VkSemaphore > imageAvailableSemaphores;
+        std::vector < VkSemaphore > renderFinishedSemaphores;
+        std::vector < VkFence > inFlightFences;
+
+    public:
+        bool framebufferResized = false;
     
     public:
         void run ()
@@ -96,13 +101,17 @@ namespace  Ragot
             createGraphicsPipeline();
             createFramebuffers();
             createCommandPool();
-            createCommandBuffer();
+            createCommandBuffers();
             createSyncObjects();
         }
+
+        void recreateSwapChain();
         
         void mainLoop();
         
         void cleanup();
+
+        void cleanupSwapChain();
         
         void createInstance();
         
@@ -124,7 +133,7 @@ namespace  Ragot
         
         void createCommandPool();
         
-        void createCommandBuffer();
+        void createCommandBuffers();
         
         void createSyncObjects();
 

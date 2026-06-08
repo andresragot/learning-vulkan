@@ -357,8 +357,8 @@ namespace Ragot
     
     void HelloTriangleApplication::createGraphicsPipeline()
     {
-        auto vertShaderCode = readFile(assets.get_asset_path("Shaders/vert.spv"));
-        auto fragShaderCode = readFile(assets.get_asset_path("Shaders/frag.spv"));
+        auto vertShaderCode = readFile(assets.get_asset_path("shaders/vert.spv"));
+        auto fragShaderCode = readFile(assets.get_asset_path("shaders/frag.spv"));
         
         VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
         VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -376,16 +376,6 @@ namespace Ragot
         fragShaderStateInfo.pName = "main";
         
         VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStateInfo, fragShaderStateInfo};
-        
-        std::vector < VkDynamicState > dynamicsStates = {
-            VK_DYNAMIC_STATE_VIEWPORT,
-            VK_DYNAMIC_STATE_SCISSOR
-        };
-        
-        VkPipelineDynamicStateCreateInfo dynamic_state {};
-        dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-        dynamic_state.dynamicStateCount = static_cast<uint32_t>(dynamicsStates.size());
-        dynamic_state.pDynamicStates = dynamicsStates.data();
         
         VkPipelineVertexInputStateCreateInfo vertex_input_info {};
         vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -424,8 +414,8 @@ namespace Ragot
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth = 1.0f;
-        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        rasterizer.cullMode = VK_CULL_MODE_NONE;
+        rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
         rasterizer.depthBiasEnable = VK_FALSE;
         rasterizer.depthBiasConstantFactor = 0.0f; // Optional
         rasterizer.depthBiasClamp = 0.0f; // Optional
@@ -441,7 +431,7 @@ namespace Ragot
         multisampling.alphaToOneEnable = VK_FALSE; // Optional
         
         VkPipelineColorBlendAttachmentState colorBlendAttachment {};
-        colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+        colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
         colorBlendAttachment.blendEnable = VK_FALSE;
         colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
         colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
@@ -485,7 +475,7 @@ namespace Ragot
         pipelineInfo.pMultisampleState = &multisampling;
         pipelineInfo.pDepthStencilState = nullptr;
         pipelineInfo.pColorBlendState = &colorBlending;
-        pipelineInfo.pDynamicState = &dynamic_state;
+        pipelineInfo.pDynamicState = nullptr;
         
         pipelineInfo.layout = pipelineLayout;
         pipelineInfo.renderPass = renderPass;
@@ -804,9 +794,9 @@ namespace Ragot
         };
         
         actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-        actualExtent.height = std::clamp(actualExtent.height, capabilities.maxImageExtent.height, capabilities.maxImageExtent.height);
+        actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
         
-        return actualExtent;            
+        return actualExtent;
     }
     
     
@@ -864,6 +854,8 @@ namespace Ragot
     
     std::vector<char> HelloTriangleApplication::readFile (const std::string & filename)
     {
+        std::cout << "Reading file: " << filename << std::endl; 
+
         std::ifstream file (filename, std::ios::ate | std::ios::binary);
         
         if (!file.is_open())
@@ -935,6 +927,11 @@ namespace Ragot
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
         vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+        
+        VkRect2D scissor {};
+        scissor.offset = {0, 0};
+        scissor.extent = swapChainExtent;
+        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
         
         vkCmdDraw(commandBuffer, 3, 1, 0, 0);
         

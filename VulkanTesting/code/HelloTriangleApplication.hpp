@@ -9,7 +9,9 @@
 
 
 // En HelloTriangleApplication.hpp, ANTES de incluir GLFW:
-#define VK_USE_PLATFORM_MACOS_MVK
+#ifdef __APPLE__
+    #define VK_USE_PLATFORM_MACOS_MVK
+#endif
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 

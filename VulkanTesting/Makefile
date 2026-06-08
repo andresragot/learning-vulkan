@@ -17,8 +17,8 @@ SOURCES = $(SRC_DIR)/main.cpp \
 VERT_SHADER = $(SHADER_DIR)/shader.vert
 FRAG_SHADER = $(SHADER_DIR)/shader.frag
 
-VERT_SPV = $(BUILD_DIR)/shader.vert.spv
-FRAG_SPV = $(BUILD_DIR)/shader.frag.spv
+VERT_SPV = $(BUILD_DIR)/assets/shaders/vert.spv
+FRAG_SPV = $(BUILD_DIR)/assets/shaders/frag.spv
 
 # ======= RULES =======
 
@@ -26,6 +26,7 @@ all: $(BUILD_DIR) shaders $(TARGET)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
+	mkdir -p $(BUILD_DIR)/assets/shaders
 
 shaders: $(VERT_SPV) $(FRAG_SPV)
 

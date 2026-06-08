@@ -59,6 +59,12 @@ namespace Ragot
     void HelloTriangleApplication::cleanup()
     {
         cleanupSwapChain();
+
+        vkDestroyBuffer(device, indexBuffer, nullptr);
+        vkFreeMemory(device, indexBufferMemory, nullptr);
+
+        vkDestroyBuffer(device, vertexBuffer, nullptr);
+        vkFreeMemory(device, vertexBufferMemory, nullptr);
         
         vkDestroyPipeline(device, graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
@@ -73,6 +79,7 @@ namespace Ragot
         }   
         
         vkDestroyCommandPool(device, commandPool, nullptr);
+        vkDestroyCommandPool(device, transferCommandPool, nullptr);
     
         vkDestroyDevice(device, nullptr);
         
@@ -410,13 +417,16 @@ namespace Ragot
         fragShaderStateInfo.pName = "main";
         
         VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStateInfo, fragShaderStateInfo};
+
+        auto bindingDescription = Vertex::getBindingDescription();
+        auto attributeDescriptions = Vertex::getAttributeDesciptions();
         
         VkPipelineVertexInputStateCreateInfo vertex_input_info {};
         vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertex_input_info.vertexBindingDescriptionCount = 0;
-        vertex_input_info.pVertexBindingDescriptions = nullptr;
-        vertex_input_info.vertexAttributeDescriptionCount = 0;
-        vertex_input_info.pVertexAttributeDescriptions = nullptr;
+        vertex_input_info.vertexBindingDescriptionCount = 1;
+        vertex_input_info.pVertexBindingDescriptions = &bindingDescription;
+        vertex_input_info.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+        vertex_input_info.pVertexAttributeDescriptions = attributeDescriptions.data();
         
         VkPipelineInputAssemblyStateCreateInfo input_assembly {};
         input_assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -448,8 +458,8 @@ namespace Ragot
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth = 1.0f;
-        rasterizer.cullMode = VK_CULL_MODE_NONE;
-        rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
         rasterizer.depthBiasEnable = VK_FALSE;
         rasterizer.depthBiasConstantFactor = 0.0f; // Optional
         rasterizer.depthBiasClamp = 0.0f; // Optional
@@ -484,6 +494,16 @@ namespace Ragot
         colorBlending.blendConstants[1] = 0.0f; // Optional
         colorBlending.blendConstants[2] = 0.0f; // Optional
         colorBlending.blendConstants[3] = 0.0f; // Optional
+
+        std::vector < VkDynamicState > dynamicStates = {
+            VK_DYNAMIC_STATE_VIEWPORT,
+            VK_DYNAMIC_STATE_SCISSOR
+        };
+
+        VkPipelineDynamicStateCreateInfo dynamicState {};
+        dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+        dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+        dynamicState.pDynamicStates = dynamicStates.data();
         
         VkPipelineLayoutCreateInfo pipelineLayoutInfo {};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -509,7 +529,7 @@ namespace Ragot
         pipelineInfo.pMultisampleState = &multisampling;
         pipelineInfo.pDepthStencilState = nullptr;
         pipelineInfo.pColorBlendState = &colorBlending;
-        pipelineInfo.pDynamicState = nullptr;
+        pipelineInfo.pDynamicState = &dynamicState;
         
         pipelineInfo.layout = pipelineLayout;
         pipelineInfo.renderPass = renderPass;
@@ -566,6 +586,59 @@ namespace Ragot
         {
             throw std::runtime_error("failed to create command pool!");
         }
+
+        VkCommandPoolCreateInfo poolInfoTransfer {};
+        poolInfoTransfer.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        poolInfoTransfer.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        poolInfoTransfer.queueFamilyIndex = queueFamilyIndices.transferFamily.value();
+
+        if (vkCreateCommandPool(device, &poolInfoTransfer, nullptr, &transferCommandPool) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create transfer command pool!");
+        }
+    }
+
+    void HelloTriangleApplication::createVertexBuffer()
+    {
+        VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+        
+        void* data;
+        vkMapMemory (device, stagingBufferMemory, 0, bufferSize, 0, &data);
+        memcpy (data, vertices.data(), (size_t) bufferSize);
+        vkUnmapMemory (device, stagingBufferMemory);
+        
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
+
+        copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
+    }
+
+    void HelloTriangleApplication::createIndexBuffer()
+    {
+        VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+        void * data;
+        vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+        memcpy(data, indices.data(), (size_t)bufferSize);
+        vkUnmapMemory(device, stagingBufferMemory);
+
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+
+        copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
     }
     
     void HelloTriangleApplication::createCommandBuffers()
@@ -744,7 +817,11 @@ namespace Ragot
         for (const auto & queueFamily : queueFamilies)
         {
             
-            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            if (queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT && not (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT))
+            {
+                indices.transferFamily = i;
+            }
+            else if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
             {
                 indices.graphicsFamily = i;
             }
@@ -764,6 +841,16 @@ namespace Ragot
             
             ++i;
         }
+
+        if (!indices.transferFamily.has_value())
+        {
+            std::cout << "WARNING: No separate transfer queue found, using graphics queue for transfers" << std::endl;
+            indices.transferFamily = indices.graphicsFamily;
+        }
+
+        std::cout << "Queue families found - Graphics: " << (indices.graphicsFamily.has_value() ? std::to_string(indices.graphicsFamily.value()) : "None")
+                  << ", Transfer: " << (indices.transferFamily.has_value() ? std::to_string(indices.transferFamily.value()) : "None")
+                  << ", Present: " << (indices.presentFamily.has_value() ? std::to_string(indices.presentFamily.value()) : "None") << std::endl;
         
         return indices;
     }
@@ -849,7 +936,7 @@ namespace Ragot
         QueueFamilyIndices indices = findQueueFamilies(physical_device);
         
         std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
-        std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+        std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.transferFamily.value(), indices.presentFamily.value()};
         
         float queuePriority = 1.0f;
         for (uint32_t queueFamily : uniqueQueueFamilies)
@@ -893,7 +980,54 @@ namespace Ragot
         }
         
         vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
-        vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+        vkGetDeviceQueue(device, indices.transferFamily.value(), 0, &transferQueue);
+        vkGetDeviceQueue(device,  indices.presentFamily.value(), 0, &presentQueue);
+    }
+
+    void HelloTriangleApplication::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer & buffer, VkDeviceMemory & bufferMemory)
+    {
+        VkBufferCreateInfo bufferInfo {};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.size = size;
+        bufferInfo.usage = usage;
+        
+        auto queueFamilies = findQueueFamilies(physical_device);
+        if (queueFamilies.graphicsFamily != queueFamilies.transferFamily)
+        {
+            bufferInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+    
+            std::vector<uint32_t> uniqueQueueFamilies = {queueFamilies.graphicsFamily.value(), queueFamilies.transferFamily.value()};
+    
+            bufferInfo.pQueueFamilyIndices = uniqueQueueFamilies.data();
+            bufferInfo.queueFamilyIndexCount = static_cast<uint32_t>(uniqueQueueFamilies.size());
+        }
+        else
+        {
+            bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            bufferInfo.queueFamilyIndexCount = 0; // Optional
+            bufferInfo.pQueueFamilyIndices = nullptr; // Optional
+        }
+        
+        if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+        {
+            throw std::runtime_error ("failed to create vertex buffer!");
+        }
+
+        VkMemoryRequirements memRequirements;
+        vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
+
+        VkMemoryAllocateInfo allocInfo {};
+        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        allocInfo.allocationSize = memRequirements.size;
+        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+
+        if (vkAllocateMemory (device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+        {
+            throw std::runtime_error ("failed to allocate buffer memory!");
+        }
+
+        vkBindBufferMemory (device, buffer, bufferMemory, 0);
+        
     }
     
     std::vector<char> HelloTriangleApplication::readFile (const std::string & filename)
@@ -935,7 +1069,7 @@ namespace Ragot
         return shaderModule;
     }
     
-    void HelloTriangleApplication::recordCommanBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+    void HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     {
         VkCommandBufferBeginInfo beginInfo {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -962,6 +1096,12 @@ namespace Ragot
         vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
         
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+        VkBuffer vertexBuffers[] = {vertexBuffer};
+        VkDeviceSize offsets[] = {0};
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+        
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
         
         VkViewport viewport {};
         viewport.x = 0.0f;
@@ -977,7 +1117,7 @@ namespace Ragot
         scissor.extent = swapChainExtent;
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
         
-        vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
         
         vkCmdEndRenderPass(commandBuffer);
         
@@ -1008,7 +1148,7 @@ namespace Ragot
         vkResetFences(device, 1, &inFlightFences[currentFrame]);
         
         vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-        recordCommanBuffer(commandBuffers[currentFrame], imageIndex);
+        recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
         
         VkSubmitInfo submitInfo {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1056,5 +1196,57 @@ namespace Ragot
         }
         
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    }
+
+    uint32_t HelloTriangleApplication::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+    {
+        VkPhysicalDeviceMemoryProperties memProperties;
+        vkGetPhysicalDeviceMemoryProperties(physical_device, &memProperties);
+
+        for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i)
+        {
+            if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+            {
+                return i;
+            }
+        }
+
+        throw std::runtime_error("failed to find suitable memory type!");
+    }
+
+    void HelloTriangleApplication::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+    {
+        VkCommandBufferAllocateInfo allocInfo {};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandPool = transferCommandPool;
+        allocInfo.commandBufferCount = 1;
+
+        VkCommandBuffer commandBuffer;
+        vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+
+        VkCommandBufferBeginInfo beginInfo {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+        vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+        VkBufferCopy copyRegion {};
+        copyRegion.srcOffset = 0; // Optional
+        copyRegion.dstOffset = 0; // Optional
+        copyRegion.size = size;
+        vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+        vkEndCommandBuffer(commandBuffer);
+
+        VkSubmitInfo submitInfo {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
+
+        vkQueueSubmit(transferQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(transferQueue);
+
+        vkFreeCommandBuffers(device, transferCommandPool, 1, &commandBuffer);
     }
 }

@@ -15,6 +15,7 @@
 
 #include <vector>
 #include <optional>
+#include <string>
 
 #include "SwapChainSupportDetails.hpp"
 #include "QueueFamilyIndices.hpp"
@@ -38,7 +39,7 @@ namespace  Ragot
 #ifdef NDEBUG
         const bool enable_validation_layers = false;
 #else
-        const bool enable_validation_layers = true;
+        const bool enable_validation_layers = false;
 #endif
 
     

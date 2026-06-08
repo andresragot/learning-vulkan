@@ -10,6 +10,7 @@
 #include <iostream>
 #include <filesystem>
 #include <string>
+#include <vector>
 
 namespace Ragot
 {

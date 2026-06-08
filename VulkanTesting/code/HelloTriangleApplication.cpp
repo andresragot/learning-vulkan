@@ -13,7 +13,14 @@
 #include <set>
 #include <fstream>
 
-#define GLFW_EXPOSE_NATIVE_COCOA
+#ifdef __APPLE__
+    #define GLFW_EXPOSE_NATIVE_COCOA
+#endif
+
+#ifdef __linux__
+    #define GLFW_EXPOSE_NATIVE_X11
+#endif
+
 #include <GLFW/glfw3native.h>
 
 #include "ObjC-interface.h"
@@ -185,21 +192,26 @@ namespace Ragot
 
     void HelloTriangleApplication::createSurface()
     {
-        id windowHandle = glfwGetCocoaWindow(window);
-        id viewHandle = (id) getViewFromNSWindowPointer(windowHandle);
+        // id windowHandle = glfwGetCocoaWindow(window);
+        // id viewHandle = (id) getViewFromNSWindowPointer(windowHandle);
         
-        VkMacOSSurfaceCreateInfoMVK create_info = {};
-        create_info.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
-        create_info.pNext = nullptr;
-        create_info.flags = 0;
-        create_info.pView = viewHandle;
+        // VkMacOSSurfaceCreateInfoMVK create_info = {};
+        // create_info.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
+        // create_info.pNext = nullptr;
+        // create_info.flags = 0;
+        // create_info.pView = viewHandle;
         
-        PFN_vkCreateMacOSSurfaceMVK vkCreateMacOSSurfaceMVK;
-        vkCreateMacOSSurfaceMVK = (PFN_vkCreateMacOSSurfaceMVK) vkGetInstanceProcAddr(vk_instance, "vkCreateMacOSSurfaceMVK");
+        // PFN_vkCreateMacOSSurfaceMVK vkCreateMacOSSurfaceMVK;
+        // vkCreateMacOSSurfaceMVK = (PFN_vkCreateMacOSSurfaceMVK) vkGetInstanceProcAddr(vk_instance, "vkCreateMacOSSurfaceMVK");
         
-        if (vkCreateMacOSSurfaceMVK(vk_instance, &create_info, nullptr, &surface) != VK_SUCCESS)
+        // if (vkCreateMacOSSurfaceMVK(vk_instance, &create_info, nullptr, &surface) != VK_SUCCESS)
+        // {
+        //     throw std::runtime_error("failed to create surface!");
+        // }
+
+        if (glfwCreateWindowSurface(vk_instance, window, nullptr, &surface) != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to create surface!");
+            throw std::runtime_error("failed to create window surface!");
         }
     }
     

@@ -59,6 +59,12 @@ namespace  Ragot
         }
     };
 
+    struct UniformBufferObject {
+        glm::mat4 model;
+        glm::mat4 view;
+        glm::mat4 proj;
+    };
+
     class HelloTriangleApplication
     {
     private:
@@ -97,6 +103,7 @@ namespace  Ragot
         VkFormat swapChainImageFormat;
         VkExtent2D swapChainExtent;
         
+        VkDescriptorSetLayout descriptorSetLayout;
         VkPipelineLayout pipelineLayout;
         VkRenderPass renderPass;
         VkPipeline graphicsPipeline;
@@ -115,6 +122,13 @@ namespace  Ragot
         VkDeviceMemory vertexBufferMemory;
         VkBuffer indexBuffer;
         VkDeviceMemory indexBufferMemory;
+
+        std::vector < VkBuffer > uniformBuffers;
+        std::vector < VkDeviceMemory > uniformBuffersMemory;
+        std::vector < void * > uniformBuffersMapped;
+
+        VkDescriptorPool descriptorPool;
+        std::vector < VkDescriptorSet > descriptorSets;
 
         const std::vector<Vertex> vertices = {
             {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
@@ -151,11 +165,15 @@ namespace  Ragot
             createSwapChain();
             createImageViews();
             createRenderPass();
+            createDescriptorSetLayout();
             createGraphicsPipeline();
             createFramebuffers();
             createCommandPool();
             createVertexBuffer();
             createIndexBuffer();
+            createUniformBuffers();
+            createDescriptorPool();
+            createDescriptorSets();
             createCommandBuffers();
             createSyncObjects();
         }
@@ -181,6 +199,8 @@ namespace  Ragot
         void createImageViews();
         
         void createRenderPass();
+
+        void createDescriptorSetLayout();
         
         void createGraphicsPipeline();
         
@@ -191,7 +211,13 @@ namespace  Ragot
         void createVertexBuffer();
 
         void createIndexBuffer();
-        
+
+        void createUniformBuffers();
+
+        void createDescriptorPool();
+
+        void createDescriptorSets();
+
         void createCommandBuffers();
         
         void createSyncObjects();
@@ -223,6 +249,8 @@ namespace  Ragot
         void recordCommandBuffer (VkCommandBuffer commandBuffer, uint32_t imageIndex);
         
         void drawFrame();
+
+        void updateUniformBuffer(uint32_t currentImage);
 
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 

@@ -1,0 +1,3 @@
+[submodule "components/stb-master"]
+	path = components/stb-master
+	url = https://github.com/nothings/stb.git

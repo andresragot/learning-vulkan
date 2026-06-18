@@ -51,8 +51,9 @@
 		8EB455802EB922CD001218DF /* Assets.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Assets.hpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/Assets.hpp"; sourceTree = "<absolute>"; };
 		8EB455812EB922CD001218DF /* Assets.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Assets.cpp; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/Assets.cpp"; sourceTree = "<absolute>"; };
 		8ECB62902E9FF80A00B88911 /* VulkanTesting */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VulkanTesting; sourceTree = BUILT_PRODUCTS_DIR; };
-		8ECCECE22EB8D75400B9DEDC /* shader.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = shader.vert; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/shaders/shader.vert"; sourceTree = "<absolute>"; };
-		8ECCECE32EB8D81700B9DEDC /* shader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = shader.frag; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/code/shaders/shader.frag"; sourceTree = "<absolute>"; };
+		8EE2B2052FE3BC130044F677 /* shader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = shader.frag; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/shaders/shader.frag"; sourceTree = "<absolute>"; };
+		8EE2B2062FE3BC130044F677 /* shader.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = shader.vert; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/shaders/shader.vert"; sourceTree = "<absolute>"; };
+		8EE2B2082FE3BC520044F677 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; name = Makefile; path = "/Users/andresragot/projects/learning-vulkan/VulkanTesting/Makefile"; sourceTree = "<absolute>"; };
 		8EE5B6AB2EA68FEA0048BD6C /* libMoltenVK.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libMoltenVK.dylib; path = ../../../libraries/vulkan/macOS/lib/libMoltenVK.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -81,8 +82,6 @@
 				8E45FF8C2EA7587C00CA6D72 /* QueueFamilyIndices.cpp */,
 				8E7000C12EA011A5004E0250 /* HelloTriangleApplication.hpp */,
 				8E7000C22EA011A5004E0250 /* HelloTriangleApplication.cpp */,
-				8ECCECE22EB8D75400B9DEDC /* shader.vert */,
-				8ECCECE32EB8D81700B9DEDC /* shader.frag */,
 				8E1B89AC2EAD3643005568DE /* SwapChainSupportDetails.hpp */,
 				8E174FCD2EAB903200D3B240 /* ObjC-interface.h */,
 			);
@@ -92,9 +91,11 @@
 		8ECB62872E9FF80A00B88911 = {
 			isa = PBXGroup;
 			children = (
+				8EE2B2072FE3BC410044F677 /* makefile */,
 				8ECB629A2E9FFB3600B88911 /* Frameworks */,
 				8ECB62912E9FF80A00B88911 /* Products */,
 				8E7000C02EA01134004E0250 /* Code */,
+				8EE2B2042FE3BBE10044F677 /* shaders */,
 			);
 			sourceTree = "<group>";
 		};
@@ -116,6 +117,23 @@
 				8E7000B52EA0101E004E0250 /* libvulkan.1.dylib */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8EE2B2042FE3BBE10044F677 /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				8EE2B2052FE3BC130044F677 /* shader.frag */,
+				8EE2B2062FE3BC130044F677 /* shader.vert */,
+			);
+			path = shaders;
+			sourceTree = "<group>";
+		};
+		8EE2B2072FE3BC410044F677 /* makefile */ = {
+			isa = PBXGroup;
+			children = (
+				8EE2B2082FE3BC520044F677 /* Makefile */,
+			);
+			path = makefile;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -183,8 +201,9 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/../../code/shaders/shader.vert",
-				"$(SRCROOT)/../../code/shaders/shader.frag",
+				"$(SRCROOT)/../../shaders/shader.vert",
+				"$(SRCROOT)/../../shaders/shader.frag",
+				"$(SRCROOT)/../../textures/texture.jpg",
 			);
 			name = "Run Script";
 			outputFileListPaths = (
@@ -192,10 +211,11 @@
 			outputPaths = (
 				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/assets/shaders/vert.spv",
 				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/assets/shaders/frag.spv",
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/assets/textures/texture.jpg",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/sh\nset -eu\n\n# --- Buscar glslangValidator (simple y portable) ---\nPATH=\"/opt/homebrew/bin:/usr/local/bin:${PATH}\"\nexport PATH\n\nfind_glslang() {\n  if command -v glslangValidator >/dev/null 2>&1; then\n    command -v glslangValidator; return 0\n  fi\n  if [ -n \"${VULKAN_SDK:-}\" ] && [ -x \"${VULKAN_SDK}/bin/glslangValidator\" ]; then\n    printf '%s\\n' \"${VULKAN_SDK}/bin/glslangValidator\"; return 0\n  fi\n  # Ajusta si lo tienes dentro del repo:\n  for rel in \"../../../libraries/vulkan/macOS/bin/glslangValidator\" \\\n             \"../../libraries/vulkan/macOS/bin/glslangValidator\" \\\n             \"../libraries/vulkan/macOS/bin/glslangValidator\"\n  do\n    if [ -x \"${SRCROOT:-.}/${rel}\" ]; then\n      printf '%s\\n' \"${SRCROOT:-.}/${rel}\"; return 0\n    fi\n  done\n  return 1\n}\n\nGLSLANG=\"$(find_glslang)\" || { echo \"ERROR: glslangValidator no encontrado\"; exit 1; }\necho \"Usando glslang: ${GLSLANG}\"\n\n# --- Diagnóstico ---\nCOUNT_IN=\"${SCRIPT_INPUT_FILE_COUNT:-0}\"\nCOUNT_OUT=\"${SCRIPT_OUTPUT_FILE_COUNT:-0}\"\necho \"INPUTS=${COUNT_IN}  OUTPUTS=${COUNT_OUT}\"\n\ncompiled=0\n\n# --- Caso 1: hay inputs y outputs => mapeo 1:1 por índice ---\nif [ \"$COUNT_IN\" -gt 0 ] && [ \"$COUNT_OUT\" -gt 0 ]; then\n  # Compila hasta el mínimo de ambos (para no reventar si no cuadran)\n  if [ \"$COUNT_IN\" -ne \"$COUNT_OUT\" ]; then\n    echo \"WARNING: Inputs y outputs no coinciden (usando el mínimo common).\"\n  fi\n  # min(COUNT_IN, COUNT_OUT)\n  n=\"$COUNT_IN\"\n  [ \"$COUNT_OUT\" -lt \"$n\" ] && n=\"$COUNT_OUT\"\n\n  i=0\n  while [ \"$i\" -lt \"$n\" ]; do\n    eval src=\\${SCRIPT_INPUT_FILE_${i}}\n    eval dst=\\${SCRIPT_OUTPUT_FILE_${i}}\n    echo \"Compilando #$i: ${src} -> ${dst}\"\n    mkdir -p \"$(dirname \"$dst\")\"\n    \"${GLSLANG}\" -V \"$src\" -o \"$dst\"\n    compiled=$((compiled+1))\n    i=$((i+1))\n  done\n\n# --- Caso 2: hay inputs pero NO hay outputs => caer a carpeta por defecto ---\nelif [ \"$COUNT_IN\" -gt 0 ]; then\n  OUT_DIR=\"${BUILT_PRODUCTS_DIR:-\"${SRCROOT:-.}/Build\"}/shaders\"\n  echo \"No hay outputs declarados. Usando OUT_DIR=${OUT_DIR}\"\n  mkdir -p \"${OUT_DIR}\"\n\n  i=0\n  while [ \"$i\" -lt \"$COUNT_IN\" ]; do\n    eval src=\\${SCRIPT_INPUT_FILE_${i}}\n    base=$(basename \"$src\")\n    name=${base%.*}\n    dst=\"${OUT_DIR}/${name}.spv\"\n    echo \"Compilando #$i: ${src} -> ${dst}\"\n    \"${GLSLANG}\" -V \"$src\" -o \"$dst\"\n    compiled=$((compiled+1))\n    i=$((i+1))\n  done\n\n# --- Caso 3: sin inputs => escaneo de carpeta por convención (último recurso) ---\nelse\n  SHADERS_DIR=\"${SRCROOT:-.}/code/shaders\"\n  OUT_DIR=\"${BUILT_PRODUCTS_DIR:-\"${SRCROOT:-.}/Build\"}/shaders\"\n  echo \"No hay inputs declarados. Escaneando ${SHADERS_DIR}\"\n  mkdir -p \"${OUT_DIR}\"\n\n  any=0\n  for src in \"${SHADERS_DIR}\"/*.vert \"${SHADERS_DIR}\"/*.frag; do\n    [ -e \"$src\" ] || continue\n    any=1\n    base=$(basename \"$src\")\n    name=${base%.*}\n    dst=\"${OUT_DIR}/${name}.spv\"\n    echo \"Compilando ${src} -> ${dst}\"\n    \"${GLSLANG}\" -V \"$src\" -o \"$dst\"\n    compiled=$((compiled+1))\n  done\n  [ \"$any\" -eq 1 ] || { echo \"ERROR: No se encontraron shaders en ${SHADERS_DIR}.\"; exit 2; }\nfi\n\n[ \"$compiled\" -gt 0 ] || { echo \"ERROR: No se compiló ningún shader.\"; exit 3; }\necho \"OK: ${compiled} shader(s) compilado(s).\"\n";
+			shellScript = "#!/bin/sh\nset -eu\n\n# ============================================================\n# Vulkan assets build script para Xcode\n#\n# Layout de salida:\n#\n#   ${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/shaders\n#   ${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/assets/textures\n#\n# Desde Xcode puedes pasar:\n#   - shaders individuales en Input Files\n#   - texturas individuales en Input Files\n#   - carpetas completas en Input Files\n#\n# Variables opcionales:\n#\n#   ASSETS_OUTPUT_DIR\n#   SHADER_OUTPUT_DIR\n#   TEXTURE_OUTPUT_DIR\n#   SHADER_INPUT_DIR\n#   TEXTURE_INPUT_DIR\n#\n# ============================================================\n\nPATH=\"/opt/homebrew/bin:/usr/local/bin:${PATH}\"\nexport PATH\n\nlog() {\n  printf '%s\\n' \"$*\"\n}\n\nwarn() {\n  printf 'WARNING: %s\\n' \"$*\" >&2\n}\n\ndie() {\n  printf 'ERROR: %s\\n' \"$*\" >&2\n  exit 1\n}\n\ndefault_resources_dir() {\n  if [ -n \"${BUILT_PRODUCTS_DIR:-}\" ] && [ -n \"${UNLOCALIZED_RESOURCES_FOLDER_PATH:-}\" ]; then\n    printf '%s\\n' \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\n  elif [ -n \"${BUILT_PRODUCTS_DIR:-}\" ]; then\n    printf '%s\\n' \"${BUILT_PRODUCTS_DIR}\"\n  else\n    printf '%s\\n' \"${SRCROOT:-.}/build\"\n  fi\n}\n\nRESOURCES_DIR=\"$(default_resources_dir)\"\n\nASSETS_OUTPUT_DIR=\"${ASSETS_OUTPUT_DIR:-${RESOURCES_DIR}/assets}\"\nSHADER_OUTPUT_DIR=\"${SHADER_OUTPUT_DIR:-${ASSETS_OUTPUT_DIR}/shaders}\"\nTEXTURE_OUTPUT_DIR=\"${TEXTURE_OUTPUT_DIR:-${ASSETS_OUTPUT_DIR}/textures}\"\n\nfind_shader_compiler() {\n  if command -v glslc >/dev/null 2>&1; then\n    command -v glslc\n    return 0\n  fi\n\n  if command -v glslangValidator >/dev/null 2>&1; then\n    command -v glslangValidator\n    return 0\n  fi\n\n  if [ -n \"${VULKAN_SDK:-}\" ]; then\n    if [ -x \"${VULKAN_SDK}/bin/glslc\" ]; then\n      printf '%s\\n' \"${VULKAN_SDK}/bin/glslc\"\n      return 0\n    fi\n\n    if [ -x \"${VULKAN_SDK}/bin/glslangValidator\" ]; then\n      printf '%s\\n' \"${VULKAN_SDK}/bin/glslangValidator\"\n      return 0\n    fi\n  fi\n\n  for rel in \\\n    \"../../../libraries/vulkan/macOS/bin/glslc\" \\\n    \"../../libraries/vulkan/macOS/bin/glslc\" \\\n    \"../libraries/vulkan/macOS/bin/glslc\" \\\n    \"../../../libraries/vulkan/macOS/bin/glslangValidator\" \\\n    \"../../libraries/vulkan/macOS/bin/glslangValidator\" \\\n    \"../libraries/vulkan/macOS/bin/glslangValidator\"\n  do\n    candidate=\"${SRCROOT:-.}/${rel}\"\n    if [ -x \"$candidate\" ]; then\n      printf '%s\\n' \"$candidate\"\n      return 0\n    fi\n  done\n\n  return 1\n}\n\nis_shader_compiler_glslang() {\n  case \"$(basename \"$SHADER_COMPILER\")\" in\n    glslangValidator) return 0 ;;\n    *) return 1 ;;\n  esac\n}\n\nis_shader() {\n  case \"$1\" in\n    *.vert|*.frag|*.comp|*.geom|*.tesc|*.tese|*.glsl) return 0 ;;\n    *) return 1 ;;\n  esac\n}\n\nis_texture() {\n  case \"$1\" in\n    *.png|*.jpg|*.jpeg|*.bmp|*.tga|*.ktx|*.ktx2|*.dds|*.webp) return 0 ;;\n    *) return 1 ;;\n  esac\n}\n\nshader_output_name() {\n  src=\"$1\"\n  base=\"$(basename \"$src\")\"\n\n  # Para imitar tu Makefile:\n  #   shader.vert -> vert.spv\n  #   shader.frag -> frag.spv\n  #\n  # Si luego tienes otro nombre:\n  #   lighting.vert -> lighting.vert.spv\n  #   skybox.frag  -> skybox.frag.spv\n\n  case \"$base\" in\n    shader.vert) printf '%s\\n' \"vert.spv\" ;;\n    shader.frag) printf '%s\\n' \"frag.spv\" ;;\n\n    *.vert) printf '%s\\n' \"${base%.vert}.vert.spv\" ;;\n    *.frag) printf '%s\\n' \"${base%.frag}.frag.spv\" ;;\n    *.comp) printf '%s\\n' \"${base%.comp}.comp.spv\" ;;\n    *.geom) printf '%s\\n' \"${base%.geom}.geom.spv\" ;;\n    *.tesc) printf '%s\\n' \"${base%.tesc}.tesc.spv\" ;;\n    *.tese) printf '%s\\n' \"${base%.tese}.tese.spv\" ;;\n    *.glsl) printf '%s\\n' \"${base%.glsl}.spv\" ;;\n    *)      printf '%s\\n' \"${base}.spv\" ;;\n  esac\n}\n\ncompile_shader() {\n  src=\"$1\"\n  dst=\"$2\"\n\n  [ -f \"$src\" ] || die \"Shader no existe: $src\"\n\n  mkdir -p \"$(dirname \"$dst\")\"\n\n  log \"Compilando shader:\"\n  log \"  SRC: $src\"\n  log \"  DST: $dst\"\n\n  if is_shader_compiler_glslang; then\n    \"$SHADER_COMPILER\" -V \"$src\" -o \"$dst\"\n  else\n    \"$SHADER_COMPILER\" \"$src\" -o \"$dst\"\n  fi\n}\n\ncopy_texture() {\n  src=\"$1\"\n  dst=\"$2\"\n\n  [ -f \"$src\" ] || die \"Textura no existe: $src\"\n\n  mkdir -p \"$(dirname \"$dst\")\"\n\n  log \"Copiando textura:\"\n  log \"  SRC: $src\"\n  log \"  DST: $dst\"\n\n  cp -f \"$src\" \"$dst\"\n}\n\nprocess_file() {\n  src=\"$1\"\n  explicit_dst=\"${2:-}\"\n\n  [ -f \"$src\" ] || die \"Archivo no existe: $src\"\n\n  if is_shader \"$src\"; then\n    dst=\"${explicit_dst:-${SHADER_OUTPUT_DIR}/$(shader_output_name \"$src\")}\"\n    compile_shader \"$src\" \"$dst\"\n    COMPILED_COUNT=$((COMPILED_COUNT + 1))\n    return 0\n  fi\n\n  if is_texture \"$src\"; then\n    dst=\"${explicit_dst:-${TEXTURE_OUTPUT_DIR}/$(basename \"$src\")}\"\n    copy_texture \"$src\" \"$dst\"\n    TEXTURE_COUNT=$((TEXTURE_COUNT + 1))\n    return 0\n  fi\n\n  warn \"Archivo ignorado porque no es shader ni textura reconocida: $src\"\n}\n\nprocess_dir() {\n  dir=\"$1\"\n\n  [ -d \"$dir\" ] || die \"Carpeta no existe: $dir\"\n\n  log \"Escaneando carpeta: $dir\"\n\n  found=0\n\n  for src in \\\n    \"$dir\"/*.vert \\\n    \"$dir\"/*.frag \\\n    \"$dir\"/*.comp \\\n    \"$dir\"/*.geom \\\n    \"$dir\"/*.tesc \\\n    \"$dir\"/*.tese \\\n    \"$dir\"/*.glsl \\\n    \"$dir\"/*.png \\\n    \"$dir\"/*.jpg \\\n    \"$dir\"/*.jpeg \\\n    \"$dir\"/*.bmp \\\n    \"$dir\"/*.tga \\\n    \"$dir\"/*.ktx \\\n    \"$dir\"/*.ktx2 \\\n    \"$dir\"/*.dds \\\n    \"$dir\"/*.webp\n  do\n    [ -e \"$src\" ] || continue\n    found=1\n    process_file \"$src\"\n  done\n\n  [ \"$found\" -eq 1 ] || warn \"No se encontraron shaders/texturas en: $dir\"\n}\n\nSHADER_COMPILER=\"$(find_shader_compiler)\" || die \"No se encontró glslc ni glslangValidator. Instala Vulkan SDK o configura VULKAN_SDK.\"\n\nlog \"Usando shader compiler: $SHADER_COMPILER\"\nlog \"ASSETS_OUTPUT_DIR:  $ASSETS_OUTPUT_DIR\"\nlog \"SHADER_OUTPUT_DIR:  $SHADER_OUTPUT_DIR\"\nlog \"TEXTURE_OUTPUT_DIR: $TEXTURE_OUTPUT_DIR\"\n\nmkdir -p \"$SHADER_OUTPUT_DIR\"\nmkdir -p \"$TEXTURE_OUTPUT_DIR\"\n\nCOMPILED_COUNT=0\nTEXTURE_COUNT=0\n\nCOUNT_IN=\"${SCRIPT_INPUT_FILE_COUNT:-0}\"\nCOUNT_OUT=\"${SCRIPT_OUTPUT_FILE_COUNT:-0}\"\n\nlog \"Xcode Input Files:  $COUNT_IN\"\nlog \"Xcode Output Files: $COUNT_OUT\"\n\nif [ \"$COUNT_IN\" -gt 0 ]; then\n  i=0\n\n  while [ \"$i\" -lt \"$COUNT_IN\" ]; do\n    eval src=\"\\${SCRIPT_INPUT_FILE_${i}}\"\n\n    explicit_dst=\"\"\n\n    if [ \"$i\" -lt \"$COUNT_OUT\" ]; then\n      eval explicit_dst=\"\\${SCRIPT_OUTPUT_FILE_${i}}\"\n    fi\n\n    if [ -d \"$src\" ]; then\n      if [ -n \"$explicit_dst\" ]; then\n        warn \"Input #$i es carpeta. Se ignora su Output File explícito: $explicit_dst\"\n      fi\n\n      process_dir \"$src\"\n    else\n      process_file \"$src\" \"$explicit_dst\"\n    fi\n\n    i=$((i + 1))\n  done\nelse\n  did_something=0\n\n  if [ -n \"${SHADER_INPUT_DIR:-}\" ]; then\n    process_dir \"$SHADER_INPUT_DIR\"\n    did_something=1\n  fi\n\n  if [ -n \"${TEXTURE_INPUT_DIR:-}\" ]; then\n    process_dir \"$TEXTURE_INPUT_DIR\"\n    did_something=1\n  fi\n\n  if [ \"$did_something\" -eq 0 ]; then\n    die \"No hay Input Files ni SHADER_INPUT_DIR / TEXTURE_INPUT_DIR configurados.\"\n  fi\nfi\n\nlog \"OK:\"\nlog \"  Shaders compilados: $COMPILED_COUNT\"\nlog \"  Texturas copiadas:  $TEXTURE_COUNT\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -343,6 +363,7 @@
 				HEADER_SEARCH_PATHS = (
 					/opt/homebrew/include,
 					../../../libraries/vulkan/macOS/include,
+					"../../../components/stb-master",
 				);
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/lib";
 				LIBRARY_SEARCH_PATHS = (
@@ -362,6 +383,7 @@
 				HEADER_SEARCH_PATHS = (
 					/opt/homebrew/include,
 					../../../libraries/vulkan/macOS/include,
+					"../../../components/stb-master",
 				);
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/lib";
 				LIBRARY_SEARCH_PATHS = (

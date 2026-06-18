@@ -258,27 +258,30 @@ namespace Ragot
 
     void HelloTriangleApplication::createSurface()
     {
-        // id windowHandle = glfwGetCocoaWindow(window);
-        // id viewHandle = (id) getViewFromNSWindowPointer(windowHandle);
+#ifdef __APPLE__
+        id windowHandle = glfwGetCocoaWindow(window);
+        id viewHandle = (id) getViewFromNSWindowPointer(windowHandle);
 
-        // VkMacOSSurfaceCreateInfoMVK create_info = {};
-        // create_info.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
-        // create_info.pNext = nullptr;
-        // create_info.flags = 0;
-        // create_info.pView = viewHandle;
+        VkMacOSSurfaceCreateInfoMVK create_info = {};
+        create_info.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
+        create_info.pNext = nullptr;
+        create_info.flags = 0;
+        create_info.pView = viewHandle;
 
-        // PFN_vkCreateMacOSSurfaceMVK vkCreateMacOSSurfaceMVK;
-        // vkCreateMacOSSurfaceMVK = (PFN_vkCreateMacOSSurfaceMVK) vkGetInstanceProcAddr(vk_instance, "vkCreateMacOSSurfaceMVK");
+        PFN_vkCreateMacOSSurfaceMVK vkCreateMacOSSurfaceMVK;
+        vkCreateMacOSSurfaceMVK = (PFN_vkCreateMacOSSurfaceMVK) vkGetInstanceProcAddr(vk_instance, "vkCreateMacOSSurfaceMVK");
 
-        // if (vkCreateMacOSSurfaceMVK(vk_instance, &create_info, nullptr, &surface) != VK_SUCCESS)
-        // {
-        //     throw std::runtime_error("failed to create surface!");
-        // }
+        if (vkCreateMacOSSurfaceMVK(vk_instance, &create_info, nullptr, &surface) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create surface!");
+        }
+#else
 
         if (glfwCreateWindowSurface(vk_instance, window, nullptr, &surface) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create window surface!");
         }
+#endif
     }
 
     void HelloTriangleApplication::createSwapChain()
@@ -629,7 +632,10 @@ namespace Ragot
     void HelloTriangleApplication::createTextureImage()
     {
         int texWidth, texHeight, texChannels;
-        stbi_uc *pixels = stbi_load("assets/textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        stbi_uc *pixels = stbi_load(assets.get_asset_path("textures/texture.jpg").c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        
+        std::cout << "assets texture path: " << assets.get_asset_path("textures/texture.jpg") << "\n";
+        
         VkDeviceSize imageSize = texWidth * texHeight * 4;
 
         if (not pixels)

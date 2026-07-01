@@ -62,6 +62,11 @@ namespace Ragot
 
             return attributeDescriptions;
         }
+
+        bool operator==(const Vertex& other) const
+        {
+            return pos == other.pos && color == other.color && texCoord == other.texCoord;
+        }
     };
 
     struct UniformBufferObject
@@ -78,6 +83,9 @@ namespace Ragot
 
         static constexpr unsigned WIDTH = 800;
         static constexpr unsigned HEIGHT = 600;
+
+        static constexpr const char *   MODEL_PATH =   "meshes/viking_room.obj";
+        static constexpr const char * TEXTURE_PATH = "textures/viking_room.png";
 
         const std::vector<const char *> validation_layers = {
 #ifdef __APPLE__
@@ -128,6 +136,8 @@ namespace Ragot
         std::vector<VkSemaphore> renderFinishedSemaphores;
         std::vector<VkFence> inFlightFences;
 
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
         VkBuffer vertexBuffer;
         VkDeviceMemory vertexBufferMemory;
         VkBuffer indexBuffer;
@@ -148,22 +158,6 @@ namespace Ragot
         VkImage depthImage;
         VkDeviceMemory depthImageMemory;
         VkImageView depthImageView;
-
-        const std::vector<Vertex> vertices = {
-            {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-            {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-            {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-            {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-
-            {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-            {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-            {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-            {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-        };
-
-        const std::vector<uint16_t> indices = {
-            0, 1, 2, 2, 3, 0,
-            4, 5, 6, 6, 7, 4};
 
     public:
         bool framebufferResized = false;
@@ -197,6 +191,7 @@ namespace Ragot
             createTextureImage();
             createTextureImageView();
             createTextureSampler();
+            loadModel();
             createVertexBuffer();
             createIndexBuffer();
             createUniformBuffers();
@@ -243,6 +238,8 @@ namespace Ragot
         void createTextureImageView();
 
         void createTextureSampler();
+
+        void loadModel();
 
         void createVertexBuffer();
 

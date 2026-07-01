@@ -13,6 +13,7 @@
 #include <set>
 #include <fstream>
 #include <chrono>
+#include <unordered_map>
 
 #ifdef __APPLE__
 #define GLFW_EXPOSE_NATIVE_COCOA
@@ -30,11 +31,29 @@
 #define GLM_FORCE_RADIANS
 #define GLF_FORCE_DEPTH_ZERO_TO_ONE
 #define CLM_FORCE_DEFAULT_ALIGNED_GENTYPES
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/hash.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#define TINYOBJLOADER_DISABLE_FAST_FLOAT
+#include <tiny_obj_loader.h>
+
+namespace std
+{
+    template <> struct hash<Ragot::Vertex> {
+        size_t operator()(Ragot::Vertex const & vertex) const
+        {
+            return ((hash<glm::vec3>()(vertex.pos) ^
+                    (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
+                    (hash<glm::vec2>()(vertex.texCoord) << 1);
+        }
+    };
+}
 
 namespace Ragot
 {
@@ -676,9 +695,9 @@ namespace Ragot
     void HelloTriangleApplication::createTextureImage()
     {
         int texWidth, texHeight, texChannels;
-        stbi_uc *pixels = stbi_load(assets.get_asset_path("textures/texture.jpg").c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        stbi_uc *pixels = stbi_load(assets.get_asset_path(TEXTURE_PATH).c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         
-        std::cout << "assets texture path: " << assets.get_asset_path("textures/texture.jpg") << "\n";
+        std::cout << "assets texture path: " << assets.get_asset_path(TEXTURE_PATH) << "\n";
         
         VkDeviceSize imageSize = texWidth * texHeight * 4;
 
@@ -781,6 +800,54 @@ namespace Ragot
         }
 
         vkBindImageMemory(device, image, imageMemory, 0);
+    }
+
+    void HelloTriangleApplication::loadModel()
+    {
+        tinyobj::attrib_t attrib;
+        std::vector<tinyobj::shape_t> shapes;
+        std::vector<tinyobj::material_t> materials;
+        std::string warn, err;
+
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, assets.get_asset_path(MODEL_PATH).c_str()))
+        {
+            throw std::runtime_error(err);
+        }
+
+        std::cout << "Loaded model: " << MODEL_PATH << std::endl;
+        std::cout << "Number of vertices: " << attrib.vertices.size() / 3 << std::endl;
+        std::cout << "Warning: " << warn << std::endl;
+
+        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+        for (const auto & shape : shapes)
+        {
+            for (const auto & index : shape.mesh.indices)
+            {
+                Vertex vertex{};
+
+                vertex.pos = {
+                    attrib.vertices[3 * index.vertex_index + 0],
+                    attrib.vertices[3 * index.vertex_index + 1],
+                    attrib.vertices[3 * index.vertex_index + 2]
+                };
+
+                vertex.texCoord = {
+                           attrib.texcoords[2 * index.texcoord_index + 0],
+                    1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+                };
+
+                vertex.color = {1.0f, 1.0f, 1.0f};
+
+                if (uniqueVertices.count(vertex) == 0)
+                {
+                    uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                    vertices.push_back(vertex);
+                }
+
+                indices.push_back(uniqueVertices[vertex]);
+            }
+        }
     }
 
     void HelloTriangleApplication::createVertexBuffer()
@@ -1367,7 +1434,7 @@ namespace Ragot
         VkDeviceSize offsets[] = {0};
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-        vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
         VkViewport viewport{};
         viewport.x = 0.0f;

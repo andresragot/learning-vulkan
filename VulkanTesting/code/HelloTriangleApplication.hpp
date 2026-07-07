@@ -160,6 +160,12 @@ namespace Ragot
         VkDeviceMemory depthImageMemory;
         VkImageView depthImageView;
 
+        VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
+
+        VkImage colorImage;
+        VkDeviceMemory colorImageMemory;
+        VkImageView colorImageView;
+
     public:
         bool framebufferResized = false;
 
@@ -187,6 +193,7 @@ namespace Ragot
             createDescriptorSetLayout();
             createGraphicsPipeline();
             createCommandPool();
+            createColorResources();
             createDepthResources();
             createFramebuffers();
             createTextureImage();
@@ -232,6 +239,8 @@ namespace Ragot
 
         void createCommandPool();
 
+        void createColorResources();
+
         void createDepthResources();
 
         void createTextureImage();
@@ -257,7 +266,7 @@ namespace Ragot
         void createSyncObjects();
 
         void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory);
-        void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory);
+        void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory);
 
         void availableExtensions();
 
@@ -304,5 +313,7 @@ namespace Ragot
         bool hasStencilComponent(VkFormat format);
         
         void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
+
+        VkSampleCountFlagBits getMaxUsableSampleCount();
     };
 }
